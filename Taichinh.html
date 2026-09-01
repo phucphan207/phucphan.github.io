@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<title>Quản Lý Tài Chính</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a7f5a;--red:#c0392b;--amber:#d97706;--blue:#1d6fa4;--purple:#7c3aed;
+  --radius:18px;--radius-sm:12px;
+  /* liquid glass tokens */
+  --glass:rgba(255,255,255,0.10);
+  --glass-border:rgba(255,255,255,0.20);
+  --glass-strong:rgba(255,255,255,0.16);
+  --glass-green:rgba(26,127,90,0.22);
+  --glass-green-b:rgba(74,222,128,0.30);
+  --glass-red:rgba(192,57,43,0.25);
+  --glass-red-b:rgba(248,113,113,0.30);
+  --glass-amber:rgba(217,119,6,0.22);
+  --glass-amber-b:rgba(251,191,36,0.30);
+  --glass-blue:rgba(29,111,164,0.22);
+  --glass-blue-b:rgba(96,165,250,0.30);
+  --glass-purple:rgba(124,58,237,0.22);
+  --glass-purple-b:rgba(167,139,250,0.30);
+  --text:#fff;--text2:rgba(255,255,255,0.75);--text3:rgba(255,255,255,0.45);
+  --bg-body:linear-gradient(135deg,#1a0533 0%,#0a1628 35%,#0d3320 65%,#1a0533 100%);
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+  background:var(--bg-body); min-height:100vh; color:var(--text);
+  font-size:15px; line-height:1.5;
+}
+/* Blobs nền */
+body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(80px);opacity:0.45;pointer-events:none;z-index:0;}
+body::before{width:350px;height:350px;background:#7c3aed;top:-80px;left:-80px;}
+body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px;}
+.blob2{position:fixed;width:220px;height:220px;background:#1d6fa4;border-radius:50%;filter:blur(70px);opacity:0.4;bottom:150px;left:-40px;pointer-events:none;z-index:0;}
+.blob3{position:fixed;width:160px;height:160px;background:#d97706;border-radius:50%;filter:blur(60px);opacity:0.35;top:200px;right:-30px;pointer-events:none;z-index:0;}
+
+/* Glass mixin helpers */
+.g{background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:0.5px solid var(--glass-border);box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 0.5px 0 rgba(255,255,255,0.22);}
+
+/* HEADER */
+.header{background:rgba(255,255,255,0.07);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-bottom:0.5px solid var(--glass-border);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;}
+.header-left h1{font-size:17px;font-weight:600;}
+.header-left .sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.theme-btn{background:rgba(255,255,255,0.12);border:0.5px solid var(--glass-border);border-radius:20px;padding:6px 12px;color:#fff;font-size:12px;cursor:pointer;font-weight:500;}
+.sync-indicator{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;}
+.sync-dot.syncing{background:#fbbf24;animation:pulse 1s infinite;}
+.sync-dot.error{background:#f87171;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* TABS */
+.tabs{display:flex;background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid var(--glass-border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:57px;z-index:99;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:60px;padding:10px 4px 8px;text-align:center;font-size:10px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;user-select:none;}
+.tab svg{display:block;margin:0 auto 3px;}
+.tab.active{color:#4ade80;border-bottom-color:#4ade80;}
+
+/* PAGES */
+.page{display:none;padding:14px;max-width:680px;margin:0 auto;padding-bottom:30px;position:relative;z-index:1;}
+.page.active{display:block;}
+
+/* CARDS — glass */
+.card{background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:0.5px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 0.5px 0 rgba(255,255,255,0.22);}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;}
+
+/* BALANCE */
+.balance-total{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.18);border-radius:var(--radius-sm);padding:18px 16px;margin-bottom:12px;text-align:center;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.25);}
+.balance-total .lbl{font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.balance-total .val{font-size:30px;font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,0.3);}
+.balance-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.balance-box{border-radius:var(--radius-sm);padding:12px 14px;}
+.balance-box.cash{background:var(--glass-green);border:0.5px solid var(--glass-green-b);box-shadow:inset 0 0.5px 0 rgba(74,222,128,0.2);}
+.balance-box.bank{background:var(--glass-blue);border:0.5px solid var(--glass-blue-b);box-shadow:inset 0 0.5px 0 rgba(96,165,250,0.2);}
+.balance-box .label{font-size:11px;font-weight:600;margin-bottom:4px;}
+.balance-box.cash .label{color:#4ade80;}
+.balance-box.bank .label{color:#60a5fa;}
+.balance-box .amount{font-size:16px;font-weight:700;word-break:break-all;}
+.balance-box.cash .amount{color:#4ade80;}
+.balance-box.bank .amount{color:#60a5fa;}
+
+/* FIELDS */
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.field-group{margin-bottom:10px;}
+.field-group label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;}
+.field-group input[type=text],.field-group input[type=number]{width:100%;padding:10px 12px;border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);font-size:15px;background:rgba(255,255,255,0.08);color:#fff;outline:none;backdrop-filter:blur(10px);}
+.field-group input::placeholder{color:var(--text3);}
+.field-group input:focus{border-color:rgba(74,222,128,0.5);background:rgba(255,255,255,0.12);}
+
+/* TX TYPE */
+.tx-type-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.tx-type-btn{padding:14px 8px;border-radius:var(--radius-sm);border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.07);font-size:15px;font-weight:700;cursor:pointer;text-align:center;color:var(--text3);transition:all 0.18s;user-select:none;}
+.tx-type-btn.expense.active{border-color:var(--glass-red-b);background:var(--glass-red);color:#f87171;box-shadow:0 4px 16px rgba(192,57,43,0.25),inset 0 0.5px 0 rgba(248,113,113,0.25);}
+.tx-type-btn.income.active{border-color:var(--glass-green-b);background:var(--glass-green);color:#4ade80;box-shadow:inset 0 0.5px 0 rgba(74,222,128,0.25);}
+.tx-type-btn.expense:not(.active){border-color:rgba(248,113,113,0.2);color:rgba(248,113,113,0.5);}
+.tx-type-btn.income:not(.active){color:rgba(255,255,255,0.3);}
+
+/* TYPE SELECT */
+.type-select{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.type-btn{padding:9px 8px;border-radius:var(--radius-sm);border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.07);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s;user-select:none;display:flex;align-items:center;justify-content:center;gap:5px;}
+.type-btn.selected-cash{border-color:var(--glass-green-b);background:var(--glass-green);color:#4ade80;}
+.type-btn.selected-bank{border-color:var(--glass-blue-b);background:var(--glass-blue);color:#60a5fa;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;user-select:none;}
+.btn:active{transform:scale(0.97);}
+.btn-green{background:rgba(26,127,90,0.5);border:0.5px solid var(--glass-green-b);color:#4ade80;box-shadow:inset 0 0.5px 0 rgba(74,222,128,0.3),0 4px 16px rgba(26,127,90,0.2);}
+.btn-red{background:rgba(192,57,43,0.5);border:0.5px solid var(--glass-red-b);color:#f87171;box-shadow:inset 0 0.5px 0 rgba(248,113,113,0.3),0 4px 16px rgba(192,57,43,0.25);}
+.btn-amber{background:rgba(217,119,6,0.45);border:0.5px solid var(--glass-amber-b);color:#fbbf24;box-shadow:inset 0 0.5px 0 rgba(251,191,36,0.3);}
+.btn-blue{background:rgba(29,111,164,0.45);border:0.5px solid var(--glass-blue-b);color:#60a5fa;box-shadow:inset 0 0.5px 0 rgba(96,165,250,0.3);}
+.btn-purple{background:rgba(124,58,237,0.45);border:0.5px solid var(--glass-purple-b);color:#a78bfa;box-shadow:inset 0 0.5px 0 rgba(167,139,250,0.3);}
+.btn-outline{background:rgba(255,255,255,0.08);border:0.5px solid var(--glass-border);color:var(--text2);}
+.btn-full{width:100%;}
+.btn-sm{padding:7px 12px;font-size:12px;font-weight:600;border-radius:8px;border:none;cursor:pointer;}
+
+/* PENDING / RECEIVABLE */
+.pending-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.pending-badge{background:var(--glass-amber);color:#fbbf24;border:0.5px solid var(--glass-amber-b);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;}
+.recv-badge{background:var(--glass-purple);color:#a78bfa;border:0.5px solid var(--glass-purple-b);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;}
+.pending-list,.recv-list{display:flex;flex-direction:column;gap:8px;}
+.pending-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--glass-amber);border:0.5px solid var(--glass-amber-b);}
+.recv-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--glass-purple);border:0.5px solid var(--glass-purple-b);}
+.pi-info{flex:1;}
+.pi-name{font-size:14px;font-weight:600;color:#fff;}
+.pi-amount{font-size:13px;font-weight:700;}
+.pending-item .pi-amount{color:#fbbf24;}
+.recv-item .pi-amount{color:#a78bfa;}
+.pi-status{font-size:11px;color:var(--text3);margin-top:2px;}
+.certainty-select{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.certainty-btn{padding:8px;border-radius:var(--radius-sm);border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.07);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;text-align:center;transition:all 0.15s;user-select:none;}
+.certainty-btn.selected-sure{border-color:var(--glass-red-b);background:var(--glass-red);color:#f87171;}
+.certainty-btn.selected-maybe{border-color:var(--glass-amber-b);background:var(--glass-amber);color:#fbbf24;}
+.confirm-pay-section{margin-top:8px;padding-top:8px;border-top:0.5px solid rgba(251,191,36,0.2);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.confirm-recv-section{margin-top:8px;padding-top:8px;border-top:0.5px solid rgba(167,139,250,0.2);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.confirm-pay-label{font-size:11px;color:var(--text3);}
+
+/* TRANSFER */
+.transfer-box{background:rgba(255,255,255,0.07);border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.15);}
+.transfer-box .tb-side{text-align:center;flex:1;}
+.transfer-box .tb-label{font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;}
+.transfer-box .tb-val{font-size:15px;font-weight:700;color:#fff;}
+.transfer-box .tb-arrow{font-size:20px;color:var(--text3);padding:0 10px;}
+
+/* WEEK TABLE */
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.week-label{font-size:13px;font-weight:600;color:var(--text2);}
+.week-arrow{width:34px;height:34px;border-radius:50%;border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.08);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:16px;user-select:none;}
+.tx-table{width:100%;border-collapse:collapse;font-size:13px;}
+.tx-table th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;padding:6px 8px;border-bottom:0.5px solid rgba(255,255,255,0.08);text-align:left;}
+.tx-table td{padding:9px 8px;border-bottom:0.5px solid rgba(255,255,255,0.06);vertical-align:middle;color:var(--text2);}
+.tx-table tr:last-child td{border-bottom:none;}
+.amount-in{color:#4ade80;font-weight:700;}
+.amount-out{color:#f87171;font-weight:700;}
+.amount-transfer{color:#60a5fa;font-weight:700;}
+.tag-cash{display:inline-block;background:var(--glass-green);color:#4ade80;border:0.5px solid var(--glass-green-b);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;}
+.tag-bank{display:inline-block;background:var(--glass-blue);color:#60a5fa;border:0.5px solid var(--glass-blue-b);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;}
+.chi-label{background:var(--glass-red);color:#f87171;border:0.5px solid var(--glass-red-b);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;}
+.thu-label{background:var(--glass-green);color:#4ade80;border:0.5px solid var(--glass-green-b);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;}
+.ck-label{background:var(--glass-blue);color:#60a5fa;border:0.5px solid var(--glass-blue-b);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;}
+.week-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+.wsbox{border-radius:var(--radius-sm);padding:10px;border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.06);text-align:center;}
+.wsbox .wsl{font-size:10px;font-weight:600;color:var(--text3);margin-bottom:3px;text-transform:uppercase;}
+.wsbox .wsv{font-size:13px;font-weight:700;}
+.wsbox.win .wsv{color:#4ade80;}
+.wsbox.wout .wsv{color:#f87171;}
+.wsbox.wbal .wsv{color:#60a5fa;}
+
+/* CHART */
+.chart-period-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.period-btn{padding:7px 14px;border-radius:20px;border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.07);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;user-select:none;}
+.period-btn.active{background:rgba(26,127,90,0.4);border-color:var(--glass-green-b);color:#4ade80;}
+.chart-wrap{position:relative;height:220px;margin-bottom:16px;}
+.chart-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.chart-nav-label{font-size:13px;font-weight:600;color:var(--text2);}
+.chart-arrow{width:30px;height:30px;border-radius:50%;border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.07);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;user-select:none;}
+.stat-table{width:100%;border-collapse:collapse;font-size:13px;}
+.stat-table th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;padding:6px 8px;border-bottom:0.5px solid rgba(255,255,255,0.08);text-align:left;}
+.stat-table td{padding:8px;border-bottom:0.5px solid rgba(255,255,255,0.06);color:var(--text2);}
+.stat-table tr:last-child td{border-bottom:none;}
+.stat-table .positive{color:#4ade80;font-weight:700;}
+.stat-table .negative{color:#f87171;font-weight:700;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,40,0.85);backdrop-filter:blur(20px);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;opacity:0;transition:all 0.3s;z-index:999;pointer-events:none;white-space:nowrap;border:0.5px solid rgba(255,255,255,0.15);box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* MISC */
+.del-btn{width:26px;height:26px;border-radius:50%;border:0.5px solid var(--glass-border);background:rgba(255,255,255,0.08);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all 0.15s;flex-shrink:0;}
+.del-btn:active{background:var(--glass-red);border-color:var(--glass-red-b);color:#f87171;}
+.empty{text-align:center;padding:28px 16px;color:var(--text3);font-size:13px;}
+.divider{height:0.5px;background:rgba(255,255,255,0.08);margin:12px 0;}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:500;display:flex;align-items:center;justify-content:center;}
+.loading-box{background:rgba(255,255,255,0.10);backdrop-filter:blur(30px);border:0.5px solid var(--glass-border);border-radius:var(--radius);padding:28px 36px;text-align:center;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.2);}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.15);border-top-color:#4ade80;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-box p{font-size:13px;color:var(--text2);}
+@media(max-width:420px){.balance-total .val{font-size:24px}.balance-box .amount{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="blob2"></div>
+<div class="blob3"></div>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-box"><div class="spinner"></div><p>Đang tải dữ liệu...</p></div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <h1>💰 Quản Lý Tài Chính</h1>
+    <div class="sub" id="header-date"></div>
+  </div>
+  <div class="header-right">
+    <div class="sync-indicator" id="sync-indicator">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-text">Đã đồng bộ</span>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 Tối</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showPage('overview')" id="tab-overview">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+    Tổng quan
+  </div>
+  <div class="tab" onclick="showPage('transaction')" id="tab-transaction">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Thu / Chi
+  </div>
+  <div class="tab" onclick="showPage('transfer')" id="tab-transfer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    Chuyển
+  </div>
+  <div class="tab" onclick="showPage('pending')" id="tab-pending">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Sẽ Chi
+  </div>
+  <div class="tab" onclick="showPage('receivable')" id="tab-receivable">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+    Sẽ Nhận
+  </div>
+  <div class="tab" onclick="showPage('history')" id="tab-history">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Lịch sử
+  </div>
+  <div class="tab" onclick="showPage('chart')" id="tab-chart">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Biểu đồ
+  </div>
+  <div class="tab" onclick="showPage('shift')" id="tab-shift">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Ca làm
+  </div>
+  <div class="tab" onclick="showPage('preset')" id="tab-preset">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    Nhanh
+  </div>
+  <div class="tab" onclick="showPage('piggy')" id="tab-piggy">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9a7 7 0 1 0-13.6 2.3C4.5 13.5 3 15.1 3 17v1h18v-1c0-1.9-1.5-3.5-2.4-5.7"/><path d="M10 17v2"/><path d="M14 17v2"/></svg>
+    Heo Đất
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="page active" id="page-overview">
+  <div class="card">
+    <div class="balance-total">
+      <div class="lbl">Tổng số tiền hiện có</div>
+      <div class="val" id="total-balance">0 ₫</div>
+    </div>
+    <div class="balance-grid">
+      <div class="balance-box cash"><div class="label">💵 Tiền mặt</div><div class="amount" id="cash-balance">0 ₫</div></div>
+      <div class="balance-box bank"><div class="label">🏦 Tài khoản</div><div class="amount" id="bank-balance">0 ₫</div></div>
+    </div>
+    <div style="background:rgba(236,72,153,0.18);border:0.5px solid rgba(249,168,212,0.3);border-radius:var(--radius-sm);padding:12px 14px;box-shadow:inset 0 0.5px 0 rgba(249,168,212,0.2);">
+      <div class="label" style="color:#f9a8d4;font-size:11px;font-weight:600;margin-bottom:4px;">🐷 Heo đất</div>
+      <div class="amount" style="color:#f9a8d4;font-size:16px;font-weight:700;" id="piggy-balance-overview">0 ₫</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Thiết lập số tiền ban đầu</div>
+    <div class="setup-row">
+      <div class="field-group"><label>💵 Tiền mặt (₫)</label><input type="text" id="init-cash" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)"></div>
+      <div class="field-group"><label>🏦 Tài khoản (₫)</label><input type="text" id="init-bank" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)"></div>
+    </div>
+    <button class="btn btn-green btn-full" onclick="saveInitBalance()">Lưu số tiền ban đầu</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Tóm tắt tuần này</div>
+    <div id="quick-summary"></div>
+  </div>
+</div>
+
+<!-- TRANSACTION -->
+<div class="page" id="page-transaction">
+  <div class="card">
+    <div class="card-title">Nhập giao dịch mới</div>
+    <div class="tx-type-row">
+      <div class="tx-type-btn income" id="btn-income" onclick="setTxType('income')">↑ Thu tiền</div>
+      <div class="tx-type-btn expense active" id="btn-expense" onclick="setTxType('expense')">↓ Chi tiền</div>
+    </div>
+
+    <!-- CHỌN NHANH -->
+    <div id="quick-pick-wrap" style="margin-bottom:12px;">
+      <button onclick="toggleQuickPick()" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:0.5px dashed rgba(251,191,36,0.5);background:rgba(217,119,6,0.12);color:#fbbf24;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <span>⚡</span><span>Chọn khoản nhanh</span><span id="quick-pick-arrow">▾</span>
+      </button>
+      <div id="quick-pick-list" style="display:none;margin-top:6px;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div id="expense-banner" style="background:var(--red);color:#fff;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:20px;">💸</span>
+      <div><div style="font-weight:700;font-size:14px;">CHI TIỀN</div><div style="font-size:11px;opacity:0.85;">Số tiền sẽ bị trừ khỏi số dư</div></div>
+    </div>
+    <div id="income-banner" style="background:var(--glass-green);color:#4ade80;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;align-items:center;gap:8px;display:none;border:0.5px solid var(--glass-green-b)">
+      <span style="font-size:20px;">💰</span>
+      <div><div style="font-weight:700;font-size:14px;">THU TIỀN</div><div style="font-size:11px;opacity:0.8;">Số tiền sẽ được cộng vào số dư</div></div>
+    </div>
+    <div class="field-group"><label>Số tiền (₫)</label><input type="text" id="tx-amount" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)"></div>
+    <div class="field-group"><label>Ghi chú (tuỳ chọn)</label><input type="text" id="tx-note" placeholder="Mô tả giao dịch..."></div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Loại tiền</label>
+      <div class="type-select">
+        <div class="type-btn selected-cash" id="txtype-cash" onclick="setMoneyType('cash')">💵 Tiền mặt</div>
+        <div class="type-btn" id="txtype-bank" onclick="setMoneyType('bank')">🏦 Tài khoản</div>
+      </div>
+    </div>
+
+    <!-- CHO MƯỢN -->
+    <div id="loan-section" style="margin-bottom:14px;padding:12px;border-radius:var(--radius-sm);border:1.5px dashed rgba(124,58,237,0.35);background:var(--purple-light);">
+      <label style="font-size:12px;font-weight:600;color:var(--purple);display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <input type="checkbox" id="tx-is-loan" style="accent-color:var(--purple);width:16px;height:16px;" onchange="toggleLoanName()">
+        💜 Cho mượn tiền — thêm vào Sẽ Nhận
+      </label>
+      <div id="loan-name-row" style="display:none;">
+        <input type="text" id="tx-loan-name" placeholder="Tên người mượn..." style="width:100%;padding:9px 12px;border:1.5px solid rgba(124,58,237,0.4);border-radius:var(--radius-sm);font-size:14px;background:var(--bg);color:var(--text);outline:none;">
+      </div>
+    </div>
+
+    <button class="btn btn-red btn-full" id="tx-submit-btn" onclick="submitTransaction()">💸 Thêm Chi tiền</button>
+  </div>
+</div>
+
+<!-- TRANSFER -->
+<div class="page" id="page-transfer">
+  <div class="card">
+    <div class="card-title">Chuyển đổi tiền</div>
+    <div class="transfer-box">
+      <div class="tb-side"><div class="tb-label">💵 Tiền mặt</div><div class="tb-val" id="tr-cash-val">0 ₫</div></div>
+      <div class="tb-arrow" id="tr-arrow-display">⇄</div>
+      <div class="tb-side"><div class="tb-label">🏦 Tài khoản</div><div class="tb-val" id="tr-bank-val">0 ₫</div></div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Hướng chuyển</label>
+      <div class="type-select">
+        <div class="type-btn selected-cash" id="tr-dir-c2b" onclick="setTransferDir('c2b')">💵→🏦 Mặt sang TK</div>
+        <div class="type-btn" id="tr-dir-b2c" onclick="setTransferDir('b2c')">🏦→💵 TK sang Mặt</div>
+      </div>
+    </div>
+    <div class="field-group"><label>Số tiền cần chuyển (₫)</label><input type="text" id="tr-amount" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)"></div>
+    <div class="field-group"><label>Ghi chú (tuỳ chọn)</label><input type="text" id="tr-note" placeholder="VD: Rút ATM, nạp ví..."></div>
+    <button class="btn btn-blue btn-full" onclick="doTransfer()">🔄 Thực hiện chuyển</button>
+  </div>
+</div>
+
+<!-- PENDING (SẼ CHI) -->
+<div class="page" id="page-pending">
+  <div class="card">
+    <div class="card-title">Thêm khoản cần chi</div>
+    <div class="field-group"><label>Tên khoản chi</label><input type="text" id="pd-name" placeholder="VD: Tiền điện, học phí..."></div>
+    <div class="field-group"><label>Số tiền dự kiến (₫)</label><input type="text" id="pd-amount" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)"></div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Mức độ chắc chắn</label>
+      <div class="certainty-select">
+        <div class="certainty-btn selected-sure" id="cert-sure" onclick="setCertainty('sure')">🔴 Chắc chắn chi</div>
+        <div class="certainty-btn" id="cert-maybe" onclick="setCertainty('maybe')">🟡 Chưa chắc chi</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" id="pd-deduct-now" style="accent-color:var(--red);width:16px;height:16px;"> Trừ tiền ngay bây giờ
+      </label>
+      <div id="pd-money-type-row" style="display:none;margin-top:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Trừ từ</label>
+        <div class="type-select">
+          <div class="type-btn selected-cash" id="pdtype-cash" onclick="setPdMoneyType('cash')">💵 Tiền mặt</div>
+          <div class="type-btn" id="pdtype-bank" onclick="setPdMoneyType('bank')">🏦 Tài khoản</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-amber btn-full" onclick="addPending()">Thêm khoản cần chi</button>
+  </div>
+  <div class="card">
+    <div class="pending-header">
+      <div class="card-title" style="margin-bottom:0;">Danh sách cần chi</div>
+      <div class="pending-badge" id="pending-count-badge">0</div>
+    </div>
+    <div class="pending-list" id="pending-list"></div>
+  </div>
+</div>
+
+<!-- RECEIVABLE (SẼ NHẬN) -->
+<div class="page" id="page-receivable">
+  <div class="card">
+    <div class="card-title">Thêm khoản sẽ nhận</div>
+    <div class="field-group"><label>Tên / Người nợ</label><input type="text" id="rv-name" placeholder="VD: Anh Nam nợ tiền ăn..."></div>
+    <div class="field-group"><label>Số tiền (₫)</label><input type="text" id="rv-amount" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)"></div>
+    <div class="field-group"><label>Ghi chú (tuỳ chọn)</label><input type="text" id="rv-note" placeholder="Lý do, hạn trả..."></div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" id="rv-add-now" style="accent-color:var(--purple);width:16px;height:16px;"> Cộng tiền vào số dư ngay
+      </label>
+      <div id="rv-money-type-row" style="display:none;margin-top:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Nhận vào</label>
+        <div class="type-select">
+          <div class="type-btn selected-cash" id="rvtype-cash" onclick="setRvMoneyType('cash')">💵 Tiền mặt</div>
+          <div class="type-btn" id="rvtype-bank" onclick="setRvMoneyType('bank')">🏦 Tài khoản</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-purple btn-full" onclick="addReceivable()">Thêm khoản sẽ nhận</button>
+  </div>
+  <div class="card">
+    <div class="pending-header">
+      <div class="card-title" style="margin-bottom:0;">Danh sách sẽ nhận</div>
+      <div class="recv-badge" id="recv-count-badge">0</div>
+    </div>
+    <div class="recv-list" id="recv-list"></div>
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Tổng đang bị nợ</div>
+      <div style="font-size:20px;font-weight:700;color:var(--purple);" id="recv-total">0 ₫</div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="card">
+    <div class="week-nav">
+      <div class="week-arrow" onclick="prevWeek()">&#8249;</div>
+      <div class="week-label" id="week-label">Tuần này</div>
+      <div class="week-arrow" onclick="nextWeek()">&#8250;</div>
+    </div>
+    <div class="week-summary" id="week-summary"></div>
+    <div class="divider"></div>
+    <div class="table-wrap">
+      <table class="tx-table">
+        <thead><tr><th>Ngày</th><th>Ghi chú</th><th>Loại</th><th style="text-align:right">Số tiền</th><th></th></tr></thead>
+        <tbody id="tx-table-body"></tbody>
+      </table>
+    </div>
+    <div id="tx-table-empty" class="empty" style="display:none;">Không có giao dịch trong tuần này</div>
+  </div>
+</div>
+
+<!-- CHART -->
+<div class="page" id="page-chart">
+  <div class="card">
+    <div class="card-title">Biểu đồ thu chi</div>
+    <div class="chart-period-row">
+      <div class="period-btn active" id="period-day" onclick="setPeriod('day')">Ngày/tuần</div>
+      <div class="period-btn" id="period-week" onclick="setPeriod('week')">Tuần/tháng</div>
+      <div class="period-btn" id="period-month" onclick="setPeriod('month')">Tháng/năm</div>
+      <div class="period-btn" id="period-year" onclick="setPeriod('year')">Năm/năm</div>
+    </div>
+    <div class="chart-nav">
+      <div class="chart-arrow" onclick="prevChart()">&#8249;</div>
+      <div class="chart-nav-label" id="chart-nav-label"></div>
+      <div class="chart-arrow" onclick="nextChart()">&#8250;</div>
+    </div>
+    <div class="chart-wrap"><canvas id="myChart"></canvas></div>
+    <div style="display:flex;gap:16px;justify-content:center;margin-bottom:12px;font-size:12px;">
+      <span><span style="display:inline-block;width:12px;height:12px;background:var(--green);border-radius:2px;margin-right:4px;"></span>Thu</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:var(--red);border-radius:2px;margin-right:4px;"></span>Chi</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Bảng chi tiết</div>
+    <div class="table-wrap">
+      <table class="stat-table">
+        <thead><tr><th>Kỳ</th><th style="text-align:right">Thu</th><th style="text-align:right">Chi</th><th style="text-align:right">Chênh lệch</th></tr></thead>
+        <tbody id="stat-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SHIFT (CA LÀM) -->
+<div class="page" id="page-shift">
+
+  <!-- NÚT BẮT ĐẦU / KẾT THÚC CA -->
+  <div class="card" id="shift-control-card">
+    <div id="shift-inactive">
+      <div style="text-align:center;padding:8px 0 16px;">
+        <div style="font-size:40px;margin-bottom:8px;">🛵</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text2);margin-bottom:4px;">Chưa có ca làm nào</div>
+        <div style="font-size:12px;color:var(--text3);">Bấm bắt đầu ca khi xuất phát</div>
+      </div>
+      <button class="btn btn-green btn-full" onclick="startShift()">🟢 Bắt đầu ca</button>
+    </div>
+    <div id="shift-active" style="display:none;">
+      <div style="background:rgba(74,222,128,0.1);border:0.5px solid rgba(74,222,128,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px;">
+        <div style="font-size:11px;color:#4ade80;font-weight:700;margin-bottom:6px;">🟢 ĐANG TRONG CA</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:12px;color:var(--text3);">Bắt đầu</span>
+          <span style="font-size:13px;font-weight:600;color:var(--text2);" id="shift-start-display">--:--</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:12px;color:var(--text3);">Thời gian</span>
+          <span style="font-size:13px;font-weight:600;color:#4ade80;" id="shift-elapsed">00:00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:12px;color:var(--text3);">Số dư đầu ca</span>
+          <span style="font-size:13px;font-weight:600;color:var(--text2);" id="shift-start-balance">0 ₫</span>
+        </div>
+      </div>
+      <button class="btn btn-red btn-full" onclick="endShift()">🔴 Kết thúc ca</button>
+    </div>
+  </div>
+
+  <!-- LỊCH SỬ CA -->
+  <div class="card">
+    <div class="pending-header">
+      <div class="card-title" style="margin-bottom:0;">Lịch sử ca làm</div>
+      <div class="pending-badge" id="shift-count-badge">0</div>
+    </div>
+    <div id="shift-list"></div>
+  </div>
+
+</div>
+
+<!-- PRESET (KHOẢN NHANH) -->
+<div class="page" id="page-preset">
+  <div class="card">
+    <div class="card-title">Thêm khoản nhanh mới</div>
+    <div class="field-group"><label>Tên khoản</label><input type="text" id="ps-name" placeholder="VD: Tiền phà, Xăng xe..."></div>
+    <div class="field-group"><label>Số tiền (₫)</label><input type="text" id="ps-amount" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)"></div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Loại</label>
+      <div class="type-select">
+        <div class="type-btn selected-cash" id="ps-type-expense" onclick="setPsType('expense')">💸 Chi tiền</div>
+        <div class="type-btn" id="ps-type-income" onclick="setPsType('income')">💰 Thu tiền</div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Loại tiền</label>
+      <div class="type-select">
+        <div class="type-btn selected-cash" id="ps-money-cash" onclick="setPsMoneyType('cash')">💵 Tiền mặt</div>
+        <div class="type-btn" id="ps-money-bank" onclick="setPsMoneyType('bank')">🏦 Tài khoản</div>
+      </div>
+    </div>
+    <div class="field-group"><label>Icon (tuỳ chọn)</label><input type="text" id="ps-icon" placeholder="VD: 🛥 ⛽ 🍜 🛵"></div>
+    <button class="btn btn-amber btn-full" onclick="addPreset()">⚡ Thêm khoản nhanh</button>
+  </div>
+
+  <div class="card">
+    <div class="pending-header">
+      <div class="card-title" style="margin-bottom:0;">Danh sách khoản nhanh</div>
+      <div class="pending-badge" id="preset-count-badge">0</div>
+    </div>
+    <div id="preset-list"></div>
+  </div>
+</div>
+
+<!-- PIGGY BANK (HEO ĐẤT) -->
+<div class="page" id="page-piggy">
+
+  <div class="card" style="text-align:center;padding:20px 16px;">
+    <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 4px 16px rgba(236,72,153,0.5));">🐷</div>
+    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Heo đất của tôi</div>
+    <div style="font-size:32px;font-weight:700;color:#f9a8d4;text-shadow:0 2px 12px rgba(236,72,153,0.3);" id="piggy-total">0 ₫</div>
+    <div style="font-size:12px;color:var(--text3);margin-top:4px;" id="piggy-sub">Chưa có tiền nào</div>
+
+    <!-- THANH TIẾN ĐỘ MỤC TIÊU -->
+    <div id="piggy-goal-wrap" style="display:none;margin-top:14px;">
+      <div style="background:rgba(255,255,255,0.08);border-radius:20px;height:8px;overflow:hidden;margin-bottom:6px;">
+        <div id="piggy-prog-bar" style="height:100%;border-radius:20px;background:linear-gradient(90deg,#ec4899,#a855f7);width:0%;transition:width 0.5s;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);">
+        <span id="piggy-prog-pct">0%</span>
+        <span>🎯 <span id="piggy-goal-display">0 ₫</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- THỐNG KÊ -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+    <div class="card" style="padding:12px;text-align:center;">
+      <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Số lần nạp</div>
+      <div style="font-size:18px;font-weight:700;color:#f9a8d4;" id="piggy-count">0</div>
+    </div>
+    <div class="card" style="padding:12px;text-align:center;">
+      <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Hôm nay</div>
+      <div style="font-size:18px;font-weight:700;color:#f9a8d4;" id="piggy-today">0 ₫</div>
+    </div>
+  </div>
+
+  <!-- NẠP TIỀN -->
+  <div class="card">
+    <div class="card-title">Nạp tiền vào heo</div>
+    <div class="field-group">
+      <label>Số tiền (₫)</label>
+      <input type="text" id="piggy-amount" placeholder="0" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)">
+    </div>
+    <div class="field-group">
+      <label>Ghi chú</label>
+      <input type="text" id="piggy-note" placeholder="Tiền lẻ cuối ngày" value="Tiền lẻ cuối ngày">
+    </div>
+    <button class="btn btn-full" onclick="addPiggy()" style="background:rgba(236,72,153,0.4);border:0.5px solid rgba(249,168,212,0.4);color:#f9a8d4;font-weight:700;padding:12px;border-radius:var(--radius-sm);font-size:14px;cursor:pointer;box-shadow:inset 0 0.5px 0 rgba(249,168,212,0.3);margin-bottom:8px;width:100%;">🐷 Bỏ vào heo đất</button>
+    <button class="btn btn-outline btn-full" onclick="withdrawPiggy()">💸 Rút tiền ra</button>
+  </div>
+
+  <!-- ĐẶT MỤC TIÊU -->
+  <div class="card">
+    <div class="card-title">Mục tiêu để dành</div>
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1;" class="field-group">
+        <input type="text" id="piggy-goal-input" placeholder="VD: 2.000.000" inputmode="numeric" onblur="fmtBlur(this)" onfocus="fmtFocus(this)" style="width:100%;padding:10px 12px;border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);font-size:14px;background:rgba(255,255,255,0.08);color:#fff;outline:none;">
+      </div>
+      <button onclick="setPiggyGoal()" style="padding:10px 16px;border-radius:var(--radius-sm);border:0.5px solid rgba(167,139,250,0.4);background:rgba(124,58,237,0.3);color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;height:42px;">Lưu</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:4px;">Để trống nếu không cần mục tiêu</div>
+  </div>
+
+  <!-- LỊCH SỬ -->
+  <div class="card">
+    <div class="pending-header">
+      <div class="card-title" style="margin-bottom:0;">Lịch sử</div>
+      <div style="background:rgba(236,72,153,0.2);color:#f9a8d4;border:0.5px solid rgba(249,168,212,0.3);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;" id="piggy-hist-count">0</div>
+    </div>
+    <div id="piggy-list"></div>
+  </div>
+
+</div>
+
+<!-- SHIFT MODAL -->
+<div id="shift-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center;">
+  <div style="background:rgba(20,20,35,0.95);backdrop-filter:blur(30px);border:0.5px solid rgba(255,255,255,0.15);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:680px;box-shadow:0 -8px 40px rgba(0,0,0,0.4);">
+    <div style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 16px;"></div>
+    <div class="card-title">Nhập số tiền sau ca</div>
+    <div id="shift-modal-info" style="background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;font-size:13px;color:var(--text2);"></div>
+    <div class="field-group">
+      <label>💵 Tiền mặt đếm được (₫)</label>
+      <input type="text" id="shift-end-cash" placeholder="0" inputmode="numeric" oninput="fmtInput(this);calcShiftResult()">
+    </div>
+    <div class="field-group">
+      <label>🏦 Số dư tài khoản (₫)</label>
+      <input type="text" id="shift-end-bank" placeholder="0" inputmode="numeric" oninput="fmtInput(this);calcShiftResult()">
+    </div>
+    <div id="shift-result-preview" style="background:rgba(74,222,128,0.1);border:0.5px solid rgba(74,222,128,0.25);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;display:none;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:12px;color:var(--text3);">Tổng sau ca</span>
+        <span style="font-size:13px;font-weight:700;color:#fff;" id="shift-total-after">0 ₫</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:12px;color:var(--text3);">Thu nhập ca này</span>
+        <span style="font-size:15px;font-weight:700;" id="shift-income-preview">0 ₫</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn btn-outline btn-full" onclick="closeShiftModal()">Để sau</button>
+      <button class="btn btn-green btn-full" onclick="confirmShiftEnd()">✅ Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbzwZf4PgyQYZMxu9kUy5q8mTxuLar0LHmdSAychkDb_-FHx1TgmDY49GdpngJUsVWKp/exec';
+let state = { cashBalance:0, bankBalance:0, transactions:[], pending:[], receivable:[], shifts:[], activeShift:null, presets:[], piggy:{total:0,goal:0,history:[]} };
+let syncTimer = null;
+let myChart = null;
+let chartPeriod = 'day';
+let chartOffset = 0;
+
+// ===== THEME =====
+function initTheme() {
+  document.getElementById('theme-btn').style.display='none'; // liquid glass luôn tối
+}
+function toggleTheme() {}
+
+// ===== SYNC =====
+function setSyncStatus(s, t) {
+  document.getElementById('sync-dot').className = 'sync-dot'+(s==='syncing'?' syncing':s==='error'?' error':'');
+  document.getElementById('sync-text').textContent = t;
+}
+async function loadFromSheets() {
+  try {
+    setSyncStatus('syncing','Đang tải...');
+    const res = await fetch(API_URL);
+    const json = await res.json();
+    if (json.ok && json.data) {
+      state.cashBalance = json.data.cashBalance||0;
+      state.bankBalance = json.data.bankBalance||0;
+      state.transactions = json.data.transactions||[];
+      state.pending = json.data.pending||[];
+      state.receivable = json.data.receivable||[];
+      state.shifts = json.data.shifts||[];
+      state.activeShift = json.data.activeShift||null;
+      state.presets = json.data.presets||[];
+      state.piggy = json.data.piggy||{total:0,goal:0,history:[]};
+      saveLocal(); setSyncStatus('ok','Đã đồng bộ');
+    } else throw new Error();
+  } catch(e) { loadLocal(); setSyncStatus('error','Dùng bản cục bộ'); }
+  document.getElementById('loading-overlay').style.display='none';
+  renderAll();
+}
+async function saveToSheets() {
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(async()=>{
+    try {
+      setSyncStatus('syncing','Đang lưu...');
+      const res = await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'saveAll',...state})});
+      const json = await res.json();
+      if (json.ok) setSyncStatus('ok','Đã đồng bộ'); else throw new Error();
+    } catch(e) { setSyncStatus('error','Lỗi đồng bộ'); }
+  },800);
+}
+function saveLocal() { localStorage.setItem('tcapp_v4',JSON.stringify(state)); }
+function loadLocal() {
+  try {
+    const s = localStorage.getItem('tcapp_v4')||localStorage.getItem('tcapp_v3')||localStorage.getItem('tcapp_v2');
+    if (s) { const p=JSON.parse(s); state={...state,...p}; if(!state.receivable)state.receivable=[]; if(!state.shifts)state.shifts=[]; if(!state.presets)state.presets=[]; if(!state.piggy)state.piggy={total:0,goal:0,history:[]}; }
+  } catch(e){}
+}
+function saveState() { saveLocal(); saveToSheets(); }
+
+// ===== INPUT FORMAT =====
+function fmtInput(el) {} // không làm gì khi đang gõ
+function fmtBlur(el) {
+  // Format khi rời ô
+  const raw = el.value.replace(/[^0-9]/g,'');
+  if (!raw) { el.value=''; return; }
+  el.value = parseInt(raw,10).toLocaleString('vi-VN').replace(/,/g,'.');
+}
+function fmtFocus(el) {
+  // Bỏ dấu chấm khi focus để gõ số thuần
+  el.value = el.value.replace(/\./g,'').replace(/[^0-9]/g,'');
+}
+function getVal(id) {
+  const raw = document.getElementById(id).value.replace(/\./g,'').replace(/,/g,'').trim();
+  return parseFloat(raw)||0;
+}
+function setVal(id, n) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!n) { el.value=''; return; }
+  el.value = Math.round(n).toLocaleString('vi-VN').replace(/,/g,'.');
+}
+// ===== FORMAT =====
+function fmt(n) { return Math.round(n).toLocaleString('vi-VN').replace(/,/g,'.')+' ₫'; }
+function fmtExact(n) { return n.toLocaleString('vi-VN').replace(/,/g,'.')+' ₫'; }
+function fmtShort(n) {
+  const a=Math.abs(n);
+  if(a>=1e9) return (n/1e9).toFixed(1)+' tỷ';
+  if(a>=1e6) return (n/1e6).toFixed(1)+' tr';
+  if(a>=1e3) return (n/1e3).toFixed(0)+'k';
+  return Math.round(n).toLocaleString('vi-VN');
+}
+function fmtDate(ts) { const d=new Date(ts); return d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0'); }
+function fmtDateFull(ts) { const d=new Date(ts); const days=['CN','T2','T3','T4','T5','T6','T7']; return days[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function updateHeaderDate() {
+  const d=new Date(), days=['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
+  document.getElementById('header-date').textContent=days[d.getDay()]+', '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+}
+
+function renderAll() { renderBalance(); renderQuickSummary(); renderPending(); renderReceivable(); renderWeek(); updateTransferDisplay(); renderShift(); renderPresets(); renderPiggy(); }
+
+// ===== PAGE NAV =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name==='chart') { chartOffset=0; renderChart(); }
+  if (name==='transfer') updateTransferDisplay();
+  if (name==='shift') renderShift();
+  if (name==='preset') renderPresets();
+  if (name==='piggy') renderPiggy();
+}
+
+// ===== BALANCE =====
+function renderBalance() {
+  document.getElementById('total-balance').textContent = fmt(state.cashBalance+state.bankBalance);
+  document.getElementById('cash-balance').textContent = fmt(state.cashBalance);
+  document.getElementById('bank-balance').textContent = fmt(state.bankBalance);
+  const piggyEl = document.getElementById('piggy-balance-overview');
+  if (piggyEl) piggyEl.textContent = fmt(state.piggy ? state.piggy.total : 0);
+  setVal('init-cash', state.cashBalance);
+  setVal('init-bank', state.bankBalance);
+}
+function saveInitBalance() {
+  state.cashBalance = getVal('init-cash');
+  state.bankBalance = getVal('init-bank');
+  saveState(); renderBalance(); showToast('✅ Đã lưu số tiền ban đầu');
+}
+
+// ===== TRANSACTION =====
+let currentTxType='expense', currentMoneyType='cash';
+function setTxType(t) {
+  currentTxType=t;
+  document.getElementById('btn-income').classList.toggle('active',t==='income');
+  document.getElementById('btn-expense').classList.toggle('active',t==='expense');
+  document.getElementById('expense-banner').style.display=t==='expense'?'flex':'none';
+  document.getElementById('income-banner').style.display=t==='income'?'flex':'none';
+  const btn=document.getElementById('tx-submit-btn');
+  btn.className=t==='expense'?'btn btn-red btn-full':'btn btn-green btn-full';
+  btn.textContent=t==='expense'?'💸 Thêm Chi tiền':'💰 Thêm Thu tiền';
+  // Chỉ hiện option cho mượn khi chi tiền
+  document.getElementById('loan-section').style.display=t==='expense'?'block':'none';
+  if(t==='income'){
+    document.getElementById('tx-is-loan').checked=false;
+    document.getElementById('loan-name-row').style.display='none';
+  }
+}
+function toggleLoanName() {
+  const checked=document.getElementById('tx-is-loan').checked;
+  document.getElementById('loan-name-row').style.display=checked?'block':'none';
+  if(checked) document.getElementById('tx-loan-name').focus();
+}
+function setMoneyType(t) {
+  currentMoneyType=t;
+  document.getElementById('txtype-cash').className='type-btn'+(t==='cash'?' selected-cash':'');
+  document.getElementById('txtype-bank').className='type-btn'+(t==='bank'?' selected-bank':'');
+}
+function submitTransaction() {
+  const amount=getVal('tx-amount');
+  if(!amount||amount<=0){showToast('⚠️ Nhập số tiền hợp lệ');return;}
+  const note=document.getElementById('tx-note').value.trim();
+  const isLoan=currentTxType==='expense'&&document.getElementById('tx-is-loan').checked;
+  const loanName=isLoan?document.getElementById('tx-loan-name').value.trim():'';
+  if(isLoan&&!loanName){showToast('⚠️ Nhập tên người mượn');return;}
+
+  if(currentTxType==='income'){
+    if(currentMoneyType==='cash') state.cashBalance+=amount; else state.bankBalance+=amount;
+  } else {
+    if(currentMoneyType==='cash'){if(state.cashBalance<amount){showToast('⚠️ Tiền mặt không đủ!');return;} state.cashBalance-=amount;}
+    else{if(state.bankBalance<amount){showToast('⚠️ Số dư tài khoản không đủ!');return;} state.bankBalance-=amount;}
+  }
+
+  const txNote = isLoan ? (note||'Chi') + ' — cho ' + loanName + ' mượn' : note;
+  state.transactions.push({id:Date.now(),type:currentTxType,moneyType:currentMoneyType,amount,note:txNote,ts:Date.now()});
+
+  // Nếu cho mượn → tự động tạo khoản Sẽ Nhận
+  if(isLoan){
+    state.receivable.push({id:Date.now()+1,name:loanName,amount,note:'Cho mượn: '+(note||'')});
+    showToast('💸 Đã chi & thêm '+loanName+' vào Sẽ Nhận');
+  } else {
+    showToast(currentTxType==='income'?'💰 Thu '+fmt(amount):'💸 Chi '+fmt(amount));
+  }
+
+  saveState(); renderBalance(); renderReceivable();
+  document.getElementById('tx-amount').value='';
+  document.getElementById('tx-note').value='';
+  document.getElementById('tx-is-loan').checked=false;
+  document.getElementById('tx-loan-name').value='';
+  document.getElementById('loan-name-row').style.display='none';
+}
+
+// ===== TRANSFER =====
+let transferDir='c2b';
+function setTransferDir(d) {
+  transferDir=d;
+  document.getElementById('tr-dir-c2b').className='type-btn'+(d==='c2b'?' selected-cash':'');
+  document.getElementById('tr-dir-b2c').className='type-btn'+(d==='b2c'?' selected-bank':'');
+}
+function updateTransferDisplay() {
+  document.getElementById('tr-cash-val').textContent=fmt(state.cashBalance);
+  document.getElementById('tr-bank-val').textContent=fmt(state.bankBalance);
+}
+function doTransfer() {
+  const amount=getVal('tr-amount');
+  if(!amount||amount<=0){showToast('⚠️ Nhập số tiền hợp lệ');return;}
+  const note=document.getElementById('tr-note').value.trim()||'Chuyển đổi tiền';
+  if(transferDir==='c2b'){
+    if(state.cashBalance<amount){showToast('⚠️ Tiền mặt không đủ!');return;}
+    state.cashBalance-=amount; state.bankBalance+=amount;
+    state.transactions.push({id:Date.now(),type:'transfer',moneyType:'c2b',amount,note:'[CK] '+note,ts:Date.now()});
+    showToast('🔄 Đã chuyển '+fmt(amount)+' sang tài khoản');
+  } else {
+    if(state.bankBalance<amount){showToast('⚠️ Số dư tài khoản không đủ!');return;}
+    state.bankBalance-=amount; state.cashBalance+=amount;
+    state.transactions.push({id:Date.now(),type:'transfer',moneyType:'b2c',amount,note:'[CK] '+note,ts:Date.now()});
+    showToast('🔄 Đã chuyển '+fmt(amount)+' sang tiền mặt');
+  }
+  saveState(); renderBalance(); updateTransferDisplay();
+  document.getElementById('tr-amount').value='';
+  document.getElementById('tr-note').value='';
+}
+
+// ===== PENDING =====
+let currentCertainty='sure', currentPdMoneyType='cash';
+function setCertainty(c) {
+  currentCertainty=c;
+  document.getElementById('cert-sure').className='certainty-btn'+(c==='sure'?' selected-sure':'');
+  document.getElementById('cert-maybe').className='certainty-btn'+(c==='maybe'?' selected-maybe':'');
+}
+function setPdMoneyType(t) {
+  currentPdMoneyType=t;
+  document.getElementById('pdtype-cash').className='type-btn'+(t==='cash'?' selected-cash':'');
+  document.getElementById('pdtype-bank').className='type-btn'+(t==='bank'?' selected-bank':'');
+}
+document.getElementById('pd-deduct-now').addEventListener('change',function(){
+  document.getElementById('pd-money-type-row').style.display=this.checked?'block':'none';
+});
+function addPending() {
+  const name=document.getElementById('pd-name').value.trim();
+  const amount=getVal('pd-amount');
+  const deductNow=document.getElementById('pd-deduct-now').checked;
+  if(!name){showToast('⚠️ Nhập tên khoản chi');return;}
+  if(!amount||amount<=0){showToast('⚠️ Nhập số tiền hợp lệ');return;}
+  if(deductNow){
+    if(currentPdMoneyType==='cash'){if(state.cashBalance<amount){showToast('⚠️ Tiền mặt không đủ!');return;} state.cashBalance-=amount;}
+    else{if(state.bankBalance<amount){showToast('⚠️ Số dư TK không đủ!');return;} state.bankBalance-=amount;}
+    state.transactions.push({id:Date.now(),type:'expense',moneyType:currentPdMoneyType,amount,note:'Chi: '+name,ts:Date.now()});
+    renderBalance(); showToast('💸 Đã trừ '+fmt(amount)+' cho "'+name+'"');
+  } else {
+    state.pending.push({id:Date.now(),name,amount,certainty:currentCertainty});
+    showToast('📋 Đã thêm khoản cần chi');
+  }
+  saveState();
+  document.getElementById('pd-name').value=''; document.getElementById('pd-amount').value='';
+  document.getElementById('pd-deduct-now').checked=false; document.getElementById('pd-money-type-row').style.display='none';
+  renderPending();
+}
+function payPending(id,moneyType) {
+  const idx=state.pending.findIndex(p=>p.id===id); if(idx===-1)return;
+  const p=state.pending[idx];
+  if(moneyType==='cash'){if(state.cashBalance<p.amount){showToast('⚠️ Tiền mặt không đủ!');return;} state.cashBalance-=p.amount;}
+  else{if(state.bankBalance<p.amount){showToast('⚠️ Số dư TK không đủ!');return;} state.bankBalance-=p.amount;}
+  state.transactions.push({id:Date.now(),type:'expense',moneyType,amount:p.amount,note:'Chi: '+p.name,ts:Date.now()});
+  state.pending.splice(idx,1); saveState(); renderBalance(); renderPending(); showToast('💸 Đã chi '+fmt(p.amount));
+}
+function deletePending(id){ state.pending=state.pending.filter(p=>p.id!==id); saveState(); renderPending(); showToast('🗑️ Đã xóa'); }
+function renderPending() {
+  const list=document.getElementById('pending-list');
+  document.getElementById('pending-count-badge').textContent=state.pending.length;
+  if(!state.pending.length){list.innerHTML='<div class="empty">Chưa có khoản nào cần chi</div>';return;}
+  list.innerHTML=state.pending.map(p=>`
+    <div class="pending-item">
+      <div class="pi-info">
+        <div class="pi-name">${esc(p.name)}</div>
+        <div class="pi-amount">${fmt(p.amount)}</div>
+        <div class="pi-status">${p.certainty==='sure'?'🔴 Chắc chắn chi':'🟡 Chưa chắc chi'}</div>
+        <div class="confirm-pay-section">
+          <span class="confirm-pay-label">Thanh toán:</span>
+          <button class="btn-sm" style="background:var(--green);color:#fff;" onclick="payPending(${p.id},'cash')">💵 Mặt</button>
+          <button class="btn-sm" style="background:var(--blue);color:#fff;" onclick="payPending(${p.id},'bank')">🏦 TK</button>
+        </div>
+      </div>
+      <button class="del-btn" onclick="deletePending(${p.id})">✕</button>
+    </div>`).join('');
+}
+
+// ===== RECEIVABLE =====
+let currentRvMoneyType='cash';
+function setRvMoneyType(t) {
+  currentRvMoneyType=t;
+  document.getElementById('rvtype-cash').className='type-btn'+(t==='cash'?' selected-cash':'');
+  document.getElementById('rvtype-bank').className='type-btn'+(t==='bank'?' selected-bank':'');
+}
+document.getElementById('rv-add-now').addEventListener('change',function(){
+  document.getElementById('rv-money-type-row').style.display=this.checked?'block':'none';
+});
+function addReceivable() {
+  const name=document.getElementById('rv-name').value.trim();
+  const amount=getVal('rv-amount');
+  const note=document.getElementById('rv-note').value.trim();
+  const addNow=document.getElementById('rv-add-now').checked;
+  if(!name){showToast('⚠️ Nhập tên / người nợ');return;}
+  if(!amount||amount<=0){showToast('⚠️ Nhập số tiền hợp lệ');return;}
+  if(addNow){
+    if(currentRvMoneyType==='cash') state.cashBalance+=amount; else state.bankBalance+=amount;
+    state.transactions.push({id:Date.now(),type:'income',moneyType:currentRvMoneyType,amount,note:'Nhận: '+name+(note?' - '+note:''),ts:Date.now()});
+    renderBalance(); showToast('💰 Đã cộng '+fmt(amount)+' từ "'+name+'"');
+  } else {
+    state.receivable.push({id:Date.now(),name,amount,note});
+    showToast('📋 Đã thêm khoản sẽ nhận');
+  }
+  saveState();
+  document.getElementById('rv-name').value=''; document.getElementById('rv-amount').value=''; document.getElementById('rv-note').value='';
+  document.getElementById('rv-add-now').checked=false; document.getElementById('rv-money-type-row').style.display='none';
+  renderReceivable();
+}
+function collectReceivable(id,moneyType) {
+  const idx=state.receivable.findIndex(r=>r.id===id); if(idx===-1)return;
+  const r=state.receivable[idx];
+  if(moneyType==='cash') state.cashBalance+=r.amount; else state.bankBalance+=r.amount;
+  state.transactions.push({id:Date.now(),type:'income',moneyType,amount:r.amount,note:'Nhận: '+r.name,ts:Date.now()});
+  state.receivable.splice(idx,1); saveState(); renderBalance(); renderReceivable(); showToast('💰 Đã nhận '+fmt(r.amount));
+}
+function deleteReceivable(id){ state.receivable=state.receivable.filter(r=>r.id!==id); saveState(); renderReceivable(); showToast('🗑️ Đã xóa'); }
+function renderReceivable() {
+  const list=document.getElementById('recv-list');
+  document.getElementById('recv-count-badge').textContent=state.receivable.length;
+  const total=state.receivable.reduce((s,r)=>s+r.amount,0);
+  document.getElementById('recv-total').textContent=fmt(total);
+  if(!state.receivable.length){list.innerHTML='<div class="empty">Chưa có khoản nào sẽ nhận</div>';return;}
+  list.innerHTML=state.receivable.map(r=>`
+    <div class="recv-item">
+      <div class="pi-info">
+        <div class="pi-name">${esc(r.name)}</div>
+        <div class="pi-amount">${fmt(r.amount)}</div>
+        ${r.note?`<div class="pi-status">${esc(r.note)}</div>`:''}
+        <div class="confirm-recv-section">
+          <span class="confirm-pay-label">Đã nhận:</span>
+          <button class="btn-sm" style="background:var(--green);color:#fff;" onclick="collectReceivable(${r.id},'cash')">💵 Mặt</button>
+          <button class="btn-sm" style="background:var(--blue);color:#fff;" onclick="collectReceivable(${r.id},'bank')">🏦 TK</button>
+        </div>
+      </div>
+      <button class="del-btn" onclick="deleteReceivable(${r.id})">✕</button>
+    </div>`).join('');
+}
+
+// ===== WEEK HISTORY =====
+let weekOffset=0;
+function getWeekRange(offset) {
+  const now=new Date(), dow=now.getDay();
+  const mon=new Date(now); mon.setDate(now.getDate()-(dow===0?6:dow-1)+offset*7); mon.setHours(0,0,0,0);
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6); sun.setHours(23,59,59,999);
+  return {start:mon,end:sun};
+}
+function prevWeek(){weekOffset--;renderWeek();}
+function nextWeek(){if(weekOffset<0){weekOffset++;renderWeek();}}
+function renderWeek() {
+  const {start,end}=getWeekRange(weekOffset);
+  document.getElementById('week-label').textContent=weekOffset===0?'Tuần này':weekOffset===-1?'Tuần trước':fmtDate(start.getTime())+' – '+fmtDate(end.getTime());
+  const txs=state.transactions.filter(t=>t.ts>=start&&t.ts<=end).sort((a,b)=>b.ts-a.ts);
+  let totalIn=0,totalOut=0;
+  txs.forEach(t=>{if(t.type==='income')totalIn+=t.amount;else if(t.type==='expense')totalOut+=t.amount;});
+  document.getElementById('week-summary').innerHTML=`
+    <div class="wsbox win"><div class="wsl">Thu</div><div class="wsv">+${fmtShort(totalIn)} ₫</div></div>
+    <div class="wsbox wout"><div class="wsl">Chi</div><div class="wsv">-${fmtShort(totalOut)} ₫</div></div>
+    <div class="wsbox wbal"><div class="wsl">Chênh</div><div class="wsv">${totalIn-totalOut>=0?'+':''}${fmtShort(totalIn-totalOut)} ₫</div></div>`;
+  const tbody=document.getElementById('tx-table-body');
+  const empty=document.getElementById('tx-table-empty');
+  if(!txs.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=txs.map(t=>{
+    let typeLabel='', amtClass='', amtPfx='', moneyTag='', switchBtn='';
+    if(t.type==='income'){typeLabel='<span class="thu-label">THU</span>';amtClass='amount-in';amtPfx='+';}
+    else if(t.type==='expense'){typeLabel='<span class="chi-label">CHI</span>';amtClass='amount-out';amtPfx='-';}
+    else{typeLabel='<span class="ck-label">CK</span>';amtClass='amount-transfer';amtPfx='⇄';}
+    if(t.moneyType==='cash') moneyTag='<span class="tag-cash">Mặt</span>';
+    else if(t.moneyType==='bank') moneyTag='<span class="tag-bank">TK</span>';
+    else if(t.moneyType==='c2b') moneyTag='<span class="tag-cash">Mặt</span>→<span class="tag-bank">TK</span>';
+    else moneyTag='<span class="tag-bank">TK</span>→<span class="tag-cash">Mặt</span>';
+    // Nút chuyển nguồn tiền — chỉ hiện với thu và chi (không phải transfer)
+    if(t.type==='income'||t.type==='expense'){
+      const toType=t.moneyType==='cash'?'bank':'cash';
+      const toLabel=toType==='cash'?'💵 Mặt':'🏦 TK';
+      switchBtn=`<button onclick="switchMoneyType(${t.id},'${toType}')" style="margin-top:4px;font-size:10px;padding:3px 7px;border-radius:5px;border:0.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;display:block;">⇄ ${toLabel}</button>`;
+    }
+    return `<tr>
+      <td style="white-space:nowrap;color:var(--text2);font-size:12px;">${fmtDateFull(t.ts)}</td>
+      <td style="font-size:13px;">${esc(t.note||'—')}</td>
+      <td style="white-space:nowrap;">${typeLabel} ${moneyTag}${switchBtn}</td>
+      <td style="text-align:right;white-space:nowrap;" class="${amtClass}">${amtPfx}${fmtExact(t.amount)}</td>
+      <td><button class="del-btn" onclick="deleteTransaction(${t.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+function deleteTransaction(id) {
+  const tx=state.transactions.find(t=>t.id===id); if(!tx)return;
+  if(tx.type==='income'){if(tx.moneyType==='cash')state.cashBalance-=tx.amount;else state.bankBalance-=tx.amount;}
+  else if(tx.type==='expense'){if(tx.moneyType==='cash')state.cashBalance+=tx.amount;else state.bankBalance+=tx.amount;}
+  else if(tx.type==='transfer'){
+    if(tx.moneyType==='c2b'){state.cashBalance+=tx.amount;state.bankBalance-=tx.amount;}
+    else{state.bankBalance+=tx.amount;state.cashBalance-=tx.amount;}
+  }
+  state.transactions=state.transactions.filter(t=>t.id!==id);
+  saveState();renderBalance();renderWeek();showToast('🗑️ Đã xóa giao dịch');
+}
+
+function switchMoneyType(id, toType) {
+  const tx=state.transactions.find(t=>t.id===id); if(!tx)return;
+  const fromLabel=tx.moneyType==='cash'?'💵 Tiền mặt':'🏦 Tài khoản';
+  const toLabel=toType==='cash'?'💵 Tiền mặt':'🏦 Tài khoản';
+  if(!confirm('Chuyển nguồn tiền từ '+fromLabel+' sang '+toLabel+'?\n\nSố tiền: '+fmt(tx.amount))) return;
+  const fromType=tx.moneyType;
+  if(fromType===toType) return;
+  if(tx.type==='expense'){
+    if(toType==='cash'&&state.cashBalance<tx.amount){showToast('⚠️ Tiền mặt không đủ!');return;}
+    if(toType==='bank'&&state.bankBalance<tx.amount){showToast('⚠️ Số dư TK không đủ!');return;}
+    if(fromType==='cash') state.cashBalance+=tx.amount; else state.bankBalance+=tx.amount;
+    if(toType==='cash') state.cashBalance-=tx.amount; else state.bankBalance-=tx.amount;
+  } else if(tx.type==='income'){
+    if(fromType==='cash') state.cashBalance-=tx.amount; else state.bankBalance-=tx.amount;
+    if(toType==='cash') state.cashBalance+=tx.amount; else state.bankBalance+=tx.amount;
+  }
+  tx.moneyType=toType;
+  saveState();renderBalance();renderWeek();
+  showToast('✅ Đã đổi sang '+toLabel);
+}
+
+// ===== QUICK SUMMARY =====
+function renderQuickSummary() {
+  const {start,end}=getWeekRange(0);
+  const txs=state.transactions.filter(t=>t.ts>=start&&t.ts<=end);
+  let totalIn=0,totalOut=0;
+  txs.forEach(t=>{if(t.type==='income')totalIn+=t.amount;else if(t.type==='expense')totalOut+=t.amount;});
+  const pendingTotal=state.pending.filter(p=>p.certainty==='sure').reduce((s,p)=>s+p.amount,0);
+  const recvTotal=state.receivable.reduce((s,r)=>s+r.amount,0);
+  document.getElementById('quick-summary').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div style="background:var(--glass-green);border:0.5px solid var(--glass-green-b);border-radius:var(--radius-sm);padding:10px 12px;">
+        <div style="font-size:11px;color:#4ade80;font-weight:700;margin-bottom:3px;">↑ THU TUẦN NÀY</div>
+        <div style="font-size:15px;font-weight:700;color:#4ade80;">+${fmtShort(totalIn)} ₫</div>
+      </div>
+      <div style="background:var(--glass-red);border:0.5px solid var(--glass-red-b);border-radius:var(--radius-sm);padding:10px 12px;">
+        <div style="font-size:11px;color:#f87171;font-weight:700;margin-bottom:3px;">↓ CHI TUẦN NÀY</div>
+        <div style="font-size:15px;font-weight:700;color:#f87171;">-${fmtShort(totalOut)} ₫</div>
+      </div>
+    </div>
+    ${pendingTotal>0?`<div style="background:var(--glass-amber);border:0.5px solid var(--glass-amber-b);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+      <div><div style="font-size:11px;color:#fbbf24;font-weight:700;margin-bottom:2px;">⚠️ CHẮC CHẮN CẦN CHI</div><div style="font-size:14px;font-weight:700;color:#fbbf24;">${fmt(pendingTotal)}</div></div></div>`:''}
+    ${recvTotal>0?`<div style="background:var(--glass-purple);border:0.5px solid var(--glass-purple-b);border-radius:var(--radius-sm);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">
+      <div><div style="font-size:11px;color:#a78bfa;font-weight:700;margin-bottom:2px;">💜 SẼ NHẬN ĐƯỢC</div><div style="font-size:14px;font-weight:700;color:#a78bfa;">${fmt(recvTotal)}</div></div></div>`:''}`;
+}
+
+// ===== CHART =====
+function setPeriod(p) {
+  chartPeriod=p; chartOffset=0;
+  ['day','week','month','year'].forEach(x=>document.getElementById('period-'+x).className='period-btn'+(x===p?' active':''));
+  renderChart();
+}
+function prevChart(){chartOffset--;renderChart();}
+function nextChart(){if(chartOffset<0){chartOffset++;renderChart();}}
+
+function getChartData() {
+  const now=new Date();
+  // Chỉ lấy income và expense, bỏ transfer và bỏ khoản cho mượn
+  const realTx=state.transactions.filter(t=>(t.type==='income'||t.type==='expense')&&!(t.type==='expense'&&t.note&&t.note.includes('mượn')));
+  let labels=[], incomes=[], expenses=[], navLabel='';
+
+  if(chartPeriod==='day') {
+    // Các ngày trong tuần
+    const dow=now.getDay();
+    const mon=new Date(now); mon.setDate(now.getDate()-(dow===0?6:dow-1)+chartOffset*7); mon.setHours(0,0,0,0);
+    const dayNames=['T2','T3','T4','T5','T6','T7','CN'];
+    for(let i=0;i<7;i++){
+      const d=new Date(mon); d.setDate(mon.getDate()+i);
+      const dEnd=new Date(d); dEnd.setHours(23,59,59,999);
+      labels.push(dayNames[i]+' '+d.getDate()+'/'+(d.getMonth()+1));
+      const dayTx=realTx.filter(t=>t.ts>=d&&t.ts<=dEnd);
+      incomes.push(dayTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0));
+      expenses.push(dayTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0));
+    }
+    navLabel=chartOffset===0?'Tuần này':chartOffset===-1?'Tuần trước':'Tuần '+(chartOffset<0?Math.abs(chartOffset)+' tuần trước':'');
+  } else if(chartPeriod==='week') {
+    // 4 tuần trong tháng
+    const refMonth=new Date(now.getFullYear(),now.getMonth()+chartOffset,1);
+    const y=refMonth.getFullYear(), m=refMonth.getMonth();
+    for(let w=0;w<5;w++){
+      const wStart=new Date(y,m,1+w*7); wStart.setHours(0,0,0,0);
+      if(wStart.getMonth()!==m&&w>0) break;
+      const wEnd=new Date(wStart); wEnd.setDate(wStart.getDate()+6); wEnd.setHours(23,59,59,999);
+      labels.push('T'+( w+1)+' ('+wStart.getDate()+'-'+Math.min(wEnd.getDate(),new Date(y,m+1,0).getDate())+')');
+      const wTx=realTx.filter(t=>t.ts>=wStart&&t.ts<=wEnd);
+      incomes.push(wTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0));
+      expenses.push(wTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0));
+    }
+    navLabel=(m+1)+'/'+y;
+  } else if(chartPeriod==='month') {
+    const refYear=now.getFullYear()+chartOffset;
+    for(let m=0;m<12;m++){
+      const mStart=new Date(refYear,m,1); mStart.setHours(0,0,0,0);
+      const mEnd=new Date(refYear,m+1,0); mEnd.setHours(23,59,59,999);
+      labels.push('T'+(m+1));
+      const mTx=realTx.filter(t=>t.ts>=mStart&&t.ts<=mEnd);
+      incomes.push(mTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0));
+      expenses.push(mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0));
+    }
+    navLabel='Năm '+refYear;
+  } else {
+    // year vs year: 5 năm
+    const baseYear=now.getFullYear()+chartOffset;
+    for(let i=-2;i<=2;i++){
+      const y=baseYear+i;
+      const yStart=new Date(y,0,1); yStart.setHours(0,0,0,0);
+      const yEnd=new Date(y,11,31); yEnd.setHours(23,59,59,999);
+      labels.push(String(y));
+      const yTx=realTx.filter(t=>t.ts>=yStart&&t.ts<=yEnd);
+      incomes.push(yTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0));
+      expenses.push(yTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0));
+    }
+    navLabel=baseYear+' và lân cận';
+  }
+  return {labels,incomes,expenses,navLabel};
+}
+
+function renderChart() {
+  const {labels,incomes,expenses,navLabel}=getChartData();
+  document.getElementById('chart-nav-label').textContent=navLabel;
+
+  if(myChart) myChart.destroy();
+  const ctx=document.getElementById('myChart').getContext('2d');
+  myChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Thu',data:incomes,backgroundColor:'rgba(74,222,128,0.5)',borderColor:'rgba(74,222,128,0.8)',borderWidth:1,borderRadius:6},
+        {label:'Chi',data:expenses,backgroundColor:'rgba(248,113,113,0.5)',borderColor:'rgba(248,113,113,0.8)',borderWidth:1,borderRadius:6}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>c.dataset.label+': '+c.raw.toLocaleString('vi-VN')+' ₫'}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.45)',font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.45)',font:{size:10},callback:v=>fmtShort(v)+'₫'},beginAtZero:true}
+      }
+    }
+  });
+
+  // Stat table
+  const tbody=document.getElementById('stat-table-body');
+  tbody.innerHTML=labels.map((l,i)=>{
+    const diff=incomes[i]-expenses[i];
+    return `<tr>
+      <td>${l}</td>
+      <td style="text-align:right" class="positive">+${incomes[i].toLocaleString('vi-VN')} ₫</td>
+      <td style="text-align:right" class="negative">-${expenses[i].toLocaleString('vi-VN')} ₫</td>
+      <td style="text-align:right" class="${diff>=0?'positive':'negative'}">${diff>=0?'+':''}${diff.toLocaleString('vi-VN')} ₫</td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ===== KHOẢN NHANH (PRESET) =====
+let currentPsType = 'expense';
+let currentPsMoneyType = 'cash';
+let quickPickOpen = false;
+
+function setPsType(t) {
+  currentPsType = t;
+  document.getElementById('ps-type-expense').className = 'type-btn'+(t==='expense'?' selected-cash':'');
+  document.getElementById('ps-type-income').className = 'type-btn'+(t==='income'?' selected-bank':'');
+}
+function setPsMoneyType(t) {
+  currentPsMoneyType = t;
+  document.getElementById('ps-money-cash').className = 'type-btn'+(t==='cash'?' selected-cash':'');
+  document.getElementById('ps-money-bank').className = 'type-btn'+(t==='bank'?' selected-bank':'');
+}
+
+function addPreset() {
+  const name = document.getElementById('ps-name').value.trim();
+  const amount = getVal('ps-amount');
+  const icon = document.getElementById('ps-icon').value.trim();
+  if (!name) { showToast('⚠️ Nhập tên khoản'); return; }
+  if (!amount || amount <= 0) { showToast('⚠️ Nhập số tiền hợp lệ'); return; }
+  if (!state.presets) state.presets = [];
+  state.presets.push({ id: Date.now(), name, amount, type: currentPsType, moneyType: currentPsMoneyType, icon });
+  saveState();
+  document.getElementById('ps-name').value = '';
+  document.getElementById('ps-amount').value = '';
+  document.getElementById('ps-icon').value = '';
+  renderPresets();
+  showToast('⚡ Đã thêm khoản nhanh');
+}
+
+function deletePreset(id) {
+  state.presets = state.presets.filter(p => p.id !== id);
+  saveState(); renderPresets(); renderQuickPickList();
+  showToast('🗑️ Đã xóa');
+}
+
+function applyPreset(id) {
+  const p = state.presets.find(x => x.id === id);
+  if (!p) return;
+  // Điền vào form Thu/Chi
+  setTxType(p.type);
+  setMoneyType(p.moneyType);
+  setVal('tx-amount', p.amount);
+  document.getElementById('tx-note').value = (p.icon ? p.icon + ' ' : '') + p.name;
+  // Đóng dropdown
+  closeQuickPick();
+  // Chuyển sang tab Thu/Chi
+  showPage('transaction');
+  showToast('⚡ Đã chọn: ' + p.name);
+}
+
+function toggleQuickPick() {
+  quickPickOpen = !quickPickOpen;
+  const list = document.getElementById('quick-pick-list');
+  const arrow = document.getElementById('quick-pick-arrow');
+  if (quickPickOpen) {
+    renderQuickPickList();
+    list.style.display = 'flex';
+    arrow.textContent = '▴';
+  } else {
+    closeQuickPick();
+  }
+}
+
+function closeQuickPick() {
+  quickPickOpen = false;
+  document.getElementById('quick-pick-list').style.display = 'none';
+  document.getElementById('quick-pick-arrow').textContent = '▾';
+}
+
+function renderQuickPickList() {
+  const list = document.getElementById('quick-pick-list');
+  if (!state.presets || !state.presets.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px;">Chưa có khoản nào — thêm trong tab ⚡ Nhanh</div>';
+    return;
+  }
+  list.innerHTML = state.presets.map(p => {
+    const isExp = p.type === 'expense';
+    const color = isExp ? '#f87171' : '#4ade80';
+    const bg = isExp ? 'rgba(248,113,113,0.12)' : 'rgba(74,222,128,0.12)';
+    const border = isExp ? 'rgba(248,113,113,0.3)' : 'rgba(74,222,128,0.3)';
+    return `<button onclick="applyPreset(${p.id})" style="padding:8px 12px;border-radius:20px;border:0.5px solid ${border};background:${bg};color:${color};font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+      ${p.icon||''} ${esc(p.name)} · ${fmtShort(p.amount)}₫
+    </button>`;
+  }).join('');
+}
+
+function renderPresets() {
+  if (!state.presets) state.presets = [];
+  document.getElementById('preset-count-badge').textContent = state.presets.length;
+  const list = document.getElementById('preset-list');
+  if (!state.presets.length) {
+    list.innerHTML = '<div class="empty">Chưa có khoản nhanh nào</div>';
+    return;
+  }
+  list.innerHTML = state.presets.map(p => {
+    const isExp = p.type === 'expense';
+    const color = isExp ? '#f87171' : '#4ade80';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:6px;background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.08);">
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;color:#fff;">${p.icon||''} ${esc(p.name)}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">
+          <span style="color:${color};font-weight:600;">${isExp?'Chi':'Thu'}</span> · 
+          ${p.moneyType==='cash'?'💵 Mặt':'🏦 TK'} · 
+          <span style="font-weight:600;color:#fff;">${fmt(p.amount)}</span>
+        </div>
+      </div>
+      <button class="del-btn" onclick="deletePreset(${p.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ===== CA LÀM =====
+let shiftTimer = null;
+let currentPendingShiftId = null; // ca đang chờ nhập sau
+
+function startShift() {
+  if (state.activeShift) { showToast('⚠️ Đang có ca chưa kết thúc!'); return; }
+  state.activeShift = {
+    id: Date.now(),
+    startTs: Date.now(),
+    startCash: state.cashBalance,
+    startBank: state.bankBalance
+  };
+  saveState();
+  renderShift();
+  showToast('🟢 Bắt đầu ca lúc ' + fmtTime(Date.now()));
+}
+
+function endShift() {
+  if (!state.activeShift) return;
+  state.activeShift.endTs = Date.now();
+  // Lưu vào lịch sử, đánh dấu chờ nhập
+  if (!state.shifts) state.shifts = [];
+  state.shifts.unshift({ ...state.activeShift, pending: true, endCash: null, endBank: null });
+  state.activeShift = null;
+  saveState();
+  renderShift();
+  showToast('🔴 Đã ra ca — về nhà nhớ nhập số tiền nhé!');
+}
+
+function openShiftModal(id) {
+  const s = state.shifts.find(x => x.id === id);
+  if (!s) return;
+  currentPendingShiftId = id;
+  const dur = fmtDuration(s.endTs - s.startTs);
+  document.getElementById('shift-modal-info').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span>🕐 Bắt đầu</span><strong>${fmtTime(s.startTs)}</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span>🕐 Kết thúc</span><strong>${fmtTime(s.endTs)}</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span>⏱ Thời gian</span><strong>${dur}</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span>💵 Mặt đầu ca</span><strong>${fmt(s.startCash)}</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;">
+      <span>🏦 TK đầu ca</span><strong>${fmt(s.startBank)}</strong>
+    </div>`;
+  document.getElementById('shift-end-cash').value = '';
+  document.getElementById('shift-end-bank').value = '';
+  document.getElementById('shift-result-preview').style.display = 'none';
+  const modal = document.getElementById('shift-modal');
+  modal.style.display = 'flex';
+}
+
+function closeShiftModal() {
+  document.getElementById('shift-modal').style.display = 'none';
+  currentPendingShiftId = null;
+}
+
+function calcShiftResult() {
+  const s = state.shifts.find(x => x.id === currentPendingShiftId);
+  if (!s) return;
+  const cashEl = document.getElementById('shift-end-cash').value.trim();
+  const bankEl = document.getElementById('shift-end-bank').value.trim();
+  if (!cashEl && !bankEl) { document.getElementById('shift-result-preview').style.display='none'; return; }
+  const endCash = getVal('shift-end-cash');
+  const endBank = getVal('shift-end-bank');
+  const totalAfter = endCash + endBank;
+  const totalBefore = s.startCash + s.startBank;
+  const income = totalAfter - totalBefore;
+  document.getElementById('shift-total-after').textContent = fmt(totalAfter);
+  document.getElementById('shift-income-preview').textContent = (income >= 0 ? '+' : '') + fmt(income);
+  document.getElementById('shift-income-preview').style.color = income >= 0 ? '#4ade80' : '#f87171';
+  document.getElementById('shift-result-preview').style.display = 'block';
+}
+
+function confirmShiftEnd() {
+  const s = state.shifts.find(x => x.id === currentPendingShiftId);
+  if (!s) return;
+  const endCash = getVal('shift-end-cash');
+  const endBank = getVal('shift-end-bank');
+  const cashEl = document.getElementById('shift-end-cash').value.trim();
+  const bankEl = document.getElementById('shift-end-bank').value.trim();
+  if (!cashEl && !bankEl) { showToast('⚠️ Nhập số tiền sau ca'); return; }
+  const income = (endCash + endBank) - (s.startCash + s.startBank);
+  s.endCash = endCash;
+  s.endBank = endBank;
+  s.income = income;
+  s.pending = false;
+  // Update số dư hiện tại
+  state.cashBalance = endCash;
+  state.bankBalance = endBank;
+  // Ghi vào lịch sử giao dịch
+  state.transactions.push({
+    id: Date.now(), type: income >= 0 ? 'income' : 'expense',
+    moneyType: 'cash', amount: Math.abs(income),
+    note: '🛵 Ca làm ' + fmtTime(s.startTs) + '-' + fmtTime(s.endTs),
+    ts: s.endTs
+  });
+  saveState(); renderBalance(); renderShift(); closeShiftModal();
+  showToast('✅ Ca làm: ' + (income >= 0 ? '+' : '') + fmt(income));
+}
+
+function deleteShift(id) {
+  if (!confirm('Xóa ca làm này?')) return;
+  state.shifts = state.shifts.filter(s => s.id !== id);
+  saveState(); renderShift(); showToast('🗑️ Đã xóa ca');
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+}
+function fmtDuration(ms) {
+  const h = Math.floor(ms/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  return h + ' tiếng ' + m + ' phút';
+}
+function fmtDateShort(ts) {
+  const d = new Date(ts);
+  const days = ['CN','T2','T3','T4','T5','T6','T7'];
+  return days[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth()+1);
+}
+
+function startElapsedTimer() {
+  if (shiftTimer) clearInterval(shiftTimer);
+  if (!state.activeShift) return;
+  const update = () => {
+    const el = document.getElementById('shift-elapsed');
+    if (!el || !state.activeShift) { clearInterval(shiftTimer); return; }
+    const ms = Date.now() - state.activeShift.startTs;
+    const h = Math.floor(ms/3600000).toString().padStart(2,'0');
+    const m = Math.floor((ms%3600000)/60000).toString().padStart(2,'0');
+    el.textContent = h + ':' + m;
+  };
+  update();
+  shiftTimer = setInterval(update, 60000);
+}
+
+function renderShift() {
+  if (!state.shifts) state.shifts = [];
+  const active = state.activeShift;
+
+  // Control card
+  document.getElementById('shift-inactive').style.display = active ? 'none' : 'block';
+  document.getElementById('shift-active').style.display = active ? 'block' : 'none';
+  if (active) {
+    document.getElementById('shift-start-display').textContent = fmtTime(active.startTs);
+    document.getElementById('shift-start-balance').textContent = fmt(active.startCash + active.startBank);
+    startElapsedTimer();
+  }
+
+  // Badge
+  document.getElementById('shift-count-badge').textContent = state.shifts.length;
+
+  // List
+  const list = document.getElementById('shift-list');
+  if (!state.shifts.length) {
+    list.innerHTML = '<div class="empty">Chưa có ca làm nào được lưu</div>';
+    return;
+  }
+  list.innerHTML = state.shifts.map(s => {
+    const dur = s.endTs ? fmtDuration(s.endTs - s.startTs) : '?';
+    const isPending = s.pending;
+    return `<div style="padding:12px;border-radius:var(--radius-sm);margin-bottom:8px;background:${isPending?'rgba(251,191,36,0.1)':'rgba(255,255,255,0.06)'};border:0.5px solid ${isPending?'rgba(251,191,36,0.3)':'rgba(255,255,255,0.08)'};">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#fff;">${fmtDateShort(s.startTs)}</div>
+          <div style="font-size:12px;color:var(--text3);">${fmtTime(s.startTs)} → ${s.endTs?fmtTime(s.endTs):'...'} · ${dur}</div>
+        </div>
+        <button class="del-btn" onclick="deleteShift(${s.id})">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--text3);">Đầu ca<br><span style="font-size:13px;font-weight:600;color:var(--text2);">${fmt(s.startCash+s.startBank)}</span></div>
+        <div style="font-size:11px;color:var(--text3);">Sau ca<br><span style="font-size:13px;font-weight:600;color:var(--text2);">${s.pending?'Chưa nhập':fmt(s.endCash+s.endBank)}</span></div>
+      </div>
+      ${isPending
+        ? `<button class="btn btn-amber btn-full" style="font-size:13px;padding:10px;" onclick="openShiftModal(${s.id})">📝 Nhập số tiền sau ca</button>`
+        : `<div style="text-align:center;padding:6px;background:${s.income>=0?'rgba(74,222,128,0.1)':'rgba(248,113,113,0.1)'};border-radius:8px;border:0.5px solid ${s.income>=0?'rgba(74,222,128,0.25)':'rgba(248,113,113,0.25)'};">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Thu nhập ca</div>
+            <div style="font-size:17px;font-weight:700;color:${s.income>=0?'#4ade80':'#f87171'};">${s.income>=0?'+':''}${fmt(s.income)}</div>
+          </div>`
+      }
+    </div>`;
+  }).join('');
+}
+
+// ===== HEO ĐẤT =====
+function addPiggy() {
+  const amount = getVal('piggy-amount');
+  if (!amount || amount <= 0) { showToast('⚠️ Nhập số tiền hợp lệ'); return; }
+  if (state.bankBalance < amount) { showToast('⚠️ Số dư tài khoản không đủ!'); return; }
+  const note = document.getElementById('piggy-note').value.trim() || 'Tiền lẻ cuối ngày';
+  state.bankBalance -= amount;
+  if (!state.piggy) state.piggy = { total: 0, goal: 0, history: [] };
+  state.piggy.total += amount;
+  state.piggy.history.unshift({ id: Date.now(), amount, note, ts: Date.now(), type: 'in' });
+  saveState(); renderBalance(); renderPiggy();
+  document.getElementById('piggy-amount').value = '';
+  document.getElementById('piggy-note').value = 'Tiền lẻ cuối ngày';
+  showToast('🐷 Đã bỏ ' + fmt(amount) + ' vào heo!');
+}
+
+function withdrawPiggy() {
+  if (!state.piggy || state.piggy.total <= 0) { showToast('⚠️ Heo đất đang trống!'); return; }
+  const amountStr = prompt('Rút bao nhiêu? (tối đa ' + fmt(state.piggy.total) + ')');
+  if (!amountStr) return;
+  const amount = parseFloat(amountStr.replace(/\./g,'').replace(/,/g,'')) || 0;
+  if (!amount || amount <= 0) { showToast('⚠️ Số tiền không hợp lệ'); return; }
+  if (amount > state.piggy.total) { showToast('⚠️ Heo không đủ tiền!'); return; }
+  state.piggy.total -= amount;
+  state.bankBalance += amount;
+  state.piggy.history.unshift({ id: Date.now(), amount, note: 'Rút tiền ra', ts: Date.now(), type: 'out' });
+  saveState(); renderBalance(); renderPiggy();
+  showToast('💸 Đã rút ' + fmt(amount) + ' từ heo');
+}
+
+function setPiggyGoal() {
+  const goal = getVal('piggy-goal-input');
+  if (!state.piggy) state.piggy = { total: 0, goal: 0, history: [] };
+  state.piggy.goal = goal;
+  saveState(); renderPiggy();
+  showToast(goal > 0 ? '🎯 Đã đặt mục tiêu ' + fmt(goal) : '🎯 Đã xóa mục tiêu');
+}
+
+function deletePiggyItem(id) {
+  if (!state.piggy) return;
+  const item = state.piggy.history.find(h => h.id === id);
+  if (!item) return;
+  if (!confirm('Xóa khoản này? Số dư heo đất sẽ được hoàn lại.')) return;
+  if (item.type === 'in') {
+    state.piggy.total -= item.amount;
+    state.bankBalance += item.amount;
+  } else {
+    state.piggy.total += item.amount;
+    state.bankBalance -= item.amount;
+  }
+  state.piggy.history = state.piggy.history.filter(h => h.id !== id);
+  saveState(); renderBalance(); renderPiggy();
+  showToast('🗑️ Đã xóa');
+}
+
+function renderPiggy() {
+  if (!state.piggy) state.piggy = { total: 0, goal: 0, history: [] };
+  const p = state.piggy;
+  document.getElementById('piggy-total').textContent = fmt(p.total);
+  document.getElementById('piggy-count').textContent = p.history.filter(h=>h.type==='in').length + ' lần';
+
+  // Hôm nay
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayTotal = p.history.filter(h => h.type==='in' && h.ts >= today.getTime()).reduce((s,h) => s+h.amount, 0);
+  document.getElementById('piggy-today').textContent = todayTotal > 0 ? '+' + fmt(todayTotal) : '0 ₫';
+
+  // Sub text
+  document.getElementById('piggy-sub').textContent = p.total > 0 ? 'Đang để dành · ' + p.history.filter(h=>h.type==='in').length + ' lần nạp' : 'Chưa có tiền nào';
+
+  // Mục tiêu
+  const goalWrap = document.getElementById('piggy-goal-wrap');
+  if (p.goal > 0) {
+    goalWrap.style.display = 'block';
+    const pct = Math.min(100, Math.round(p.total / p.goal * 100));
+    document.getElementById('piggy-prog-bar').style.width = pct + '%';
+    document.getElementById('piggy-prog-pct').textContent = pct + '%';
+    document.getElementById('piggy-goal-display').textContent = fmt(p.goal);
+    setVal('piggy-goal-input', p.goal);
+  } else {
+    goalWrap.style.display = 'none';
+  }
+
+  // Lịch sử
+  document.getElementById('piggy-hist-count').textContent = p.history.length;
+  const list = document.getElementById('piggy-list');
+  if (!p.history.length) { list.innerHTML = '<div class="empty">Chưa có lịch sử nào</div>'; return; }
+  list.innerHTML = p.history.map(h => {
+    const isIn = h.type === 'in';
+    const d = new Date(h.ts);
+    const timeStr = d.getDate()+'/'+(d.getMonth()+1)+' '+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);">
+      <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:${isIn?'rgba(236,72,153,0.15)':'rgba(255,255,255,0.08)'};">${isIn?'🐷':'💸'}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;color:#fff;font-weight:500;">${esc(h.note)}</div>
+        <div style="font-size:11px;color:var(--text3);">${timeStr}</div>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:${isIn?'#f9a8d4':'rgba(255,255,255,0.5)'};">${isIn?'+':'-'}${fmtExact(h.amount)}</div>
+      <button class="del-btn" onclick="deletePiggyItem(${h.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ===== INIT =====
+initTheme();
+updateHeaderDate();
+loadFromSheets();
+</script>
+</body>
+</html>
