@@ -9,15 +9,11 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --radius:18px;--radius-sm:12px;
-  --glass:rgba(255,255,255,0.10);
-  --glass-border:rgba(255,255,255,0.20);
-  --text:#fff;--text2:rgba(255,255,255,0.75);--text3:rgba(255,255,255,0.45);
+  --glass:rgba(255,255,255,0.09);
+  --glass-border:rgba(255,255,255,0.18);
+  --text:#fff;--text2:rgba(255,255,255,0.75);--text3:rgba(255,255,255,0.42);
 }
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#1a0533 0%,#0a1628 35%,#0d3320 65%,#1a0533 100%);
-  min-height:100vh;color:#fff;font-size:15px;
-}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;background:linear-gradient(135deg,#1a0533 0%,#0a1628 35%,#0d3320 65%,#1a0533 100%);min-height:100vh;color:#fff;font-size:15px;}
 body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(80px);opacity:0.45;pointer-events:none;z-index:0;}
 body::before{width:350px;height:350px;background:#7c3aed;top:-80px;left:-80px;}
 body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px;}
@@ -25,186 +21,177 @@ body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px
 .blob3{position:fixed;width:160px;height:160px;background:#d97706;border-radius:50%;filter:blur(60px);opacity:0.35;top:200px;right:-30px;pointer-events:none;z-index:0;}
 
 /* HEADER */
-.header{background:rgba(255,255,255,0.07);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-bottom:0.5px solid rgba(255,255,255,0.15);padding:12px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;}
-.header-title{display:flex;align-items:center;gap:8px;}
-.header h1{font-size:16px;font-weight:700;}
+.header{background:rgba(255,255,255,0.07);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-bottom:0.5px solid var(--glass-border);padding:12px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;}
+.header-left{display:flex;align-items:center;gap:10px;}
+.header h1{font-size:17px;font-weight:700;}
 .header .sub{font-size:10px;color:var(--text3);margin-top:1px;}
-.sync-btn{background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.sync-btn{background:rgba(255,255,255,0.1);border:0.5px solid var(--glass-border);color:var(--text2);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.sync-btn:active{transform:scale(0.95);background:rgba(255,255,255,0.15);}
 
 /* TABS */
-.tabs{display:flex;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(255,255,255,0.12);position:sticky;top:57px;z-index:99;}
-.tab{flex:1;padding:9px 4px 7px;text-align:center;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;user-select:none;white-space:nowrap;}
-.tab.active-normal{color:#60a5fa;border-bottom-color:#60a5fa;}
-.tab.active-shiny{border-bottom-color:transparent;background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6) bottom/100% 2px no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;background-image:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6);border-bottom:2px solid;border-image:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6) 1;}
+.tabs{display:flex;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(255,255,255,0.1);position:sticky;top:57px;z-index:99;}
+.tab{flex:1;padding:10px 4px 8px;text-align:center;font-size:10px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;user-select:none;white-space:nowrap;letter-spacing:0.3px;}
 .tab.active-ov{color:#4ade80;border-bottom-color:#4ade80;}
+.tab.active-normal{color:#60a5fa;border-bottom-color:#60a5fa;}
+.tab.active-shiny{color:#fbbf24;border-bottom-color:#fbbf24;}
 .tab.active-set{color:#a78bfa;border-bottom-color:#a78bfa;}
 
 /* PAGES */
-.page{display:none;padding:14px;max-width:600px;margin:0 auto;padding-bottom:50px;position:relative;z-index:1;}
+.page{display:none;padding:14px;max-width:600px;margin:0 auto;padding-bottom:56px;position:relative;z-index:1;}
 .page.active{display:block;}
 
-/* SUMMARY TOP */
-.summary-top{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
-.sum-box{background:rgba(255,255,255,0.07);border:0.5px solid rgba(255,255,255,0.14);border-radius:14px;padding:10px 6px;text-align:center;}
-.sum-box .val{font-size:22px;font-weight:800;line-height:1;}
-.sum-box .lbl{font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:0.5px;}
+/* SUMMARY BOXES */
+.summary-top{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.sum-box{background:var(--glass);border:0.5px solid var(--glass-border);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.15);}
+.sum-box .val{font-size:24px;font-weight:800;line-height:1;}
+.sum-box .lbl{font-size:9px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.6px;}
 
 /* PROGRESS */
-.prog-wrap{background:rgba(255,255,255,0.07);border:0.5px solid rgba(255,255,255,0.14);border-radius:14px;padding:14px;margin-bottom:14px;}
-.prog-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;}
+.prog-wrap{background:var(--glass);border:0.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.15);}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2);}
 .prog-bar{height:10px;background:rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;}
-.prog-fill{height:100%;border-radius:10px;transition:width 0.5s;background:linear-gradient(90deg,#4ade80,#60a5fa);}
+.prog-fill{height:100%;border-radius:10px;transition:width 0.5s ease;background:linear-gradient(90deg,#4ade80,#60a5fa);}
+
+/* GLASS CARD */
+.glass-card{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 8px 32px rgba(0,0,0,0.15),inset 0 0.5px 0 rgba(255,255,255,0.18);}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;}
 
 /* SECTION TITLE */
-.sec-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:4px;}
-.sec-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;}
+.sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:2px 2px 10px;display:flex;align-items:center;gap:8px;}
 
-/* ===== CARD THẺ THƯỜNG 1-3 SAO: viền trắng ===== */
+/* ===== CARD THƯỜNG 1-3 SAO: viền trắng ===== */
 .card-normal{
-  background:linear-gradient(145deg,#1e1e2e,#16213e);
-  border:2px solid rgba(255,255,255,0.35);
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:10px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.12);
-  display:flex;align-items:center;gap:14px;
+  background:linear-gradient(145deg,#1c1c2e,#151528);
+  border:2px solid rgba(255,255,255,0.32);
+  border-radius:16px;padding:14px;margin-bottom:10px;
+  display:flex;align-items:center;gap:12px;
   position:relative;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.1);
+  transition:transform 0.15s;
 }
-.card-normal::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,transparent 50%);
-  pointer-events:none;
-}
-.card-normal.done{border-color:#4ade80;background:linear-gradient(145deg,#0d2e1a,#0a2214);}
-.card-normal.done::before{background:linear-gradient(135deg,rgba(74,222,128,0.1) 0%,transparent 50%);}
+.card-normal:active{transform:scale(0.99);}
+.card-normal::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,transparent 60%);pointer-events:none;}
+.card-normal.done{border-color:rgba(74,222,128,0.6);background:linear-gradient(145deg,#0c2d1a,#091f12);}
 
-/* ===== CARD THẺ THƯỜNG 4-5 SAO: viền vàng ánh kim ===== */
+/* ===== CARD THƯỜNG 4-5 SAO: viền vàng ánh kim ===== */
 .card-normal.gold{
-  background:linear-gradient(145deg,#2a1f00,#1a1200);
+  background:linear-gradient(145deg,#271c00,#160f00);
   border:2px solid transparent;
-  box-shadow:0 4px 24px rgba(212,175,55,0.25),inset 0 1px 0 rgba(255,215,0,0.15);
-  position:relative;
+  box-shadow:0 4px 24px rgba(212,175,55,0.2),inset 0 1px 0 rgba(255,215,0,0.12);
 }
 .card-normal.gold::before{
   content:'';position:absolute;inset:-1px;border-radius:17px;
-  background:linear-gradient(135deg,#d4af37,#fff8a0,#d4af37,#a0760a,#d4af37);
-  background-size:300% 300%;
-  animation:goldShimmer 4s linear infinite;
+  background:linear-gradient(135deg,#d4af37,#fffacd,#d4af37,#a07820,#ffe87c,#d4af37);
+  background-size:300% 300%;animation:goldShimmer 4s linear infinite;
   z-index:0;pointer-events:none;
 }
 .card-normal.gold::after{
   content:'';position:absolute;inset:2px;border-radius:14px;
-  background:linear-gradient(145deg,#2a1f00,#1a1200);
+  background:linear-gradient(145deg,#271c00,#160f00);
   z-index:1;pointer-events:none;
 }
-.card-normal.gold .card-content,.card-normal.gold .edit-btn,.card-normal.gold .minus-btn{position:relative;z-index:2;}
-.card-normal.gold.done::after{background:linear-gradient(145deg,#0d2e1a,#0a2214);}
+.card-normal.gold.done::after{background:linear-gradient(145deg,#0c2d1a,#091f12);}
+.card-normal.gold .card-content,.card-normal.gold .action-btns{position:relative;z-index:2;}
 @keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-/* Sao 4 cánh xanh thường */
-.stars-normal{display:flex;gap:3px;margin-bottom:4px;}
-.star-n{width:14px;height:14px;background:#3b82f6;clip-path:polygon(50% 0%,55% 45%,100% 50%,55% 55%,50% 100%,45% 55%,0% 50%,45% 45%);box-shadow:0 0 7px #60a5fa;}
-.star-n.off{background:rgba(255,255,255,0.15);box-shadow:none;}
-
-/* ===== CARD THẺ SHINY ===== */
+/* ===== CARD SHINY: viền cầu vồng ===== */
 .card-shiny{
-  background:linear-gradient(145deg,#1a0f2e,#2d1a00);
-  border:2px solid transparent;
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:10px;
+  background:linear-gradient(145deg,#180d2a,#1e1000);
+  border:2px solid transparent;border-radius:16px;padding:14px;margin-bottom:10px;
   position:relative;overflow:hidden;
-  box-shadow:0 4px 24px rgba(245,158,11,0.2),0 0 0 2px transparent;
+  box-shadow:0 4px 24px rgba(139,92,246,0.2);
+  transition:transform 0.15s;
 }
+.card-shiny:active{transform:scale(0.99);}
 .card-shiny::before{
   content:'';position:absolute;inset:-1px;border-radius:17px;
-  background:linear-gradient(135deg,#f59e0b,#ec4899,#8b5cf6,#06b6d4,#f59e0b);
-  z-index:0;
-  animation:shimmer 3s linear infinite;
-  background-size:200% 200%;
+  background:linear-gradient(135deg,#f59e0b,#ec4899,#8b5cf6,#06b6d4,#4ade80,#f59e0b);
+  background-size:300% 300%;animation:shimmer 3s linear infinite;z-index:0;pointer-events:none;
 }
 .card-shiny::after{
   content:'';position:absolute;inset:2px;border-radius:14px;
-  background:linear-gradient(145deg,#1a0f2e,#2d1a00);
-  z-index:1;
+  background:linear-gradient(145deg,#180d2a,#1e1000);z-index:1;pointer-events:none;
 }
-.card-shiny.done::after{background:linear-gradient(145deg,#0d2e1a,#0a2214);}
+.card-shiny.done::after{background:linear-gradient(145deg,#0c2d1a,#091f12);}
+.shiny-inner{position:relative;z-index:2;display:flex;align-items:center;gap:12px;}
 @keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.shiny-inner{position:relative;z-index:2;display:flex;align-items:center;gap:14px;}
 
-/* Sao 4 cánh cầu vồng shiny */
-.stars-shiny{display:flex;gap:3px;margin-bottom:4px;}
-.star-s{width:14px;height:14px;clip-path:polygon(50% 0%,55% 45%,100% 50%,55% 55%,50% 100%,45% 55%,0% 50%,45% 45%);animation:starRainbow 2s linear infinite;}
+/* SAO 4 CÁNH */
+.stars-row{display:flex;gap:3px;margin-bottom:5px;}
+.star-n{width:15px;height:15px;background:#3b82f6;clip-path:polygon(50% 0%,55% 45%,100% 50%,55% 55%,50% 100%,45% 55%,0% 50%,45% 45%);box-shadow:0 0 8px rgba(59,130,246,0.7);flex-shrink:0;}
+.star-n.off{background:rgba(255,255,255,0.12);box-shadow:none;}
+.star-s{width:15px;height:15px;clip-path:polygon(50% 0%,55% 45%,100% 50%,55% 55%,50% 100%,45% 55%,0% 50%,45% 45%);animation:starRainbow 2s linear infinite;flex-shrink:0;}
+.star-s.off{background:rgba(255,255,255,0.12);box-shadow:none;animation:none;}
 @keyframes starRainbow{
-  0%{background:#f59e0b;box-shadow:0 0 6px #f59e0b;}
-  20%{background:#ec4899;box-shadow:0 0 6px #ec4899;}
-  40%{background:#8b5cf6;box-shadow:0 0 6px #8b5cf6;}
-  60%{background:#06b6d4;box-shadow:0 0 6px #06b6d4;}
-  80%{background:#4ade80;box-shadow:0 0 6px #4ade80;}
-  100%{background:#f59e0b;box-shadow:0 0 6px #f59e0b;}
+  0%{background:#f59e0b;box-shadow:0 0 7px #f59e0b;}
+  25%{background:#ec4899;box-shadow:0 0 7px #ec4899;}
+  50%{background:#8b5cf6;box-shadow:0 0 7px #8b5cf6;}
+  75%{background:#06b6d4;box-shadow:0 0 7px #06b6d4;}
+  100%{background:#f59e0b;box-shadow:0 0 7px #f59e0b;}
 }
-.star-s.off{background:rgba(255,255,255,0.15);box-shadow:none;animation:none;}
 
 /* CARD CONTENT */
 .card-content{flex:1;min-width:0;}
-.card-star-row{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
-.need-count{font-size:26px;font-weight:900;line-height:1;}
-.need-count.zero{color:#4ade80;text-shadow:0 0 12px rgba(74,222,128,0.5);}
-.need-count.low{color:#fbbf24;text-shadow:0 0 12px rgba(251,191,36,0.4);}
-.need-count.high{color:#f87171;text-shadow:0 0 12px rgba(248,113,113,0.4);}
-.need-sub{font-size:11px;color:var(--text3);}
-.done-badge{font-size:12px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);border:0.5px solid rgba(74,222,128,0.3);padding:3px 10px;border-radius:20px;}
+.card-star-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.need-count{font-size:28px;font-weight:900;line-height:1;letter-spacing:-0.5px;}
+.need-count.zero{color:#4ade80;text-shadow:0 0 14px rgba(74,222,128,0.5);}
+.need-count.low{color:#fbbf24;text-shadow:0 0 14px rgba(251,191,36,0.4);}
+.need-count.high{color:#f87171;text-shadow:0 0 14px rgba(248,113,113,0.4);}
+.need-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.done-badge{font-size:11px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);border:0.5px solid rgba(74,222,128,0.35);padding:3px 10px;border-radius:20px;white-space:nowrap;}
 
-/* MINUS BTN */
-.minus-btn{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;color:#fff;}
-.minus-btn.normal-btn{background:linear-gradient(135deg,#1d4ed8,#2563eb);box-shadow:0 4px 14px rgba(37,99,235,0.4);}
-.minus-btn.shiny-btn{background:linear-gradient(135deg,#f59e0b,#ec4899);box-shadow:0 4px 14px rgba(245,158,11,0.4);}
-.minus-btn:active{transform:scale(0.88);}
-.minus-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
-.edit-btn{width:30px;height:30px;border-radius:50%;border:0.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+/* ACTION BUTTONS */
+.action-btns{display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0;}
+.minus-btn{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:#fff;line-height:1;}
+.minus-btn.normal-btn{background:linear-gradient(135deg,#1d4ed8,#3b82f6);box-shadow:0 4px 16px rgba(59,130,246,0.45);}
+.minus-btn.gold-btn{background:linear-gradient(135deg,#b45309,#d97706);box-shadow:0 4px 16px rgba(217,119,6,0.45);}
+.minus-btn.shiny-btn{background:linear-gradient(135deg,#7c3aed,#ec4899);box-shadow:0 4px 16px rgba(236,72,153,0.4);}
+.minus-btn:active{transform:scale(0.86);}
+.minus-btn:disabled{opacity:0.25;cursor:not-allowed;transform:none !important;box-shadow:none;}
+.edit-btn{width:32px;height:32px;border-radius:50%;border:0.5px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.07);color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.edit-btn:active{background:rgba(255,255,255,0.15);transform:scale(0.92);}
 
-/* OVERVIEW MINI ROW */
-.ov-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.07);}
+/* OVERVIEW ROWS */
+.ov-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid rgba(255,255,255,0.07);}
 .ov-row:last-child{border-bottom:none;}
-.ov-stars{min-width:80px;display:flex;gap:2px;}
-.ov-bar{flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;}
-.ov-fill-n{height:100%;border-radius:6px;background:linear-gradient(90deg,#1d4ed8,#60a5fa);transition:width 0.4s;}
-.ov-fill-s{height:100%;border-radius:6px;background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6);transition:width 0.4s;background-size:200% 100%;animation:shimmer 3s linear infinite;}
-.ov-need{min-width:60px;text-align:right;font-size:12px;font-weight:700;}
-
-/* CARD GLASS GENERIC */
-.glass-card{background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:0.5px solid rgba(255,255,255,0.15);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
-.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;}
+.ov-stars{min-width:86px;display:flex;gap:3px;align-items:center;}
+.ov-bar{flex:1;height:7px;background:rgba(255,255,255,0.09);border-radius:8px;overflow:hidden;}
+.ov-fill-n{height:100%;border-radius:8px;background:linear-gradient(90deg,#1d4ed8,#60a5fa);transition:width 0.4s;}
+.ov-fill-s{height:100%;border-radius:8px;background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6);background-size:200% 100%;animation:shimmer 3s linear infinite;transition:width 0.4s;}
+.ov-need{min-width:64px;text-align:right;font-size:12px;font-weight:700;}
 
 /* SETUP */
-.setup-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.07);}
+.setup-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.07);}
 .setup-row:last-child{border-bottom:none;}
-.setup-label{font-size:13px;font-weight:600;flex:1;}
-.setup-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;padding:6px 10px;font-size:14px;font-weight:700;width:70px;text-align:center;outline:none;}
-.setup-input:focus{border-color:rgba(251,191,36,0.5);}
+.setup-label{font-size:13px;font-weight:600;flex:1;display:flex;align-items:center;gap:6px;}
+.setup-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;padding:8px 10px;font-size:15px;font-weight:700;width:72px;text-align:center;outline:none;-webkit-appearance:none;}
+.setup-input:focus{border-color:rgba(251,191,36,0.55);}
 
-/* BTNS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;user-select:none;width:100%;margin-top:8px;}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:13px 18px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;user-select:none;width:100%;margin-top:10px;letter-spacing:0.1px;}
 .btn:active{transform:scale(0.97);}
-.btn-green{background:rgba(26,127,90,0.5);border:0.5px solid rgba(74,222,128,0.3);color:#4ade80;}
-.btn-red{background:rgba(192,57,43,0.4);border:0.5px solid rgba(248,113,113,0.3);color:#f87171;}
-.btn-amber{background:rgba(217,119,6,0.45);border:0.5px solid rgba(251,191,36,0.3);color:#fbbf24;}
+.btn-green{background:rgba(26,127,90,0.5);border:0.5px solid rgba(74,222,128,0.35);color:#4ade80;box-shadow:inset 0 0.5px 0 rgba(74,222,128,0.3);}
+.btn-red{background:rgba(192,57,43,0.45);border:0.5px solid rgba(248,113,113,0.35);color:#f87171;box-shadow:inset 0 0.5px 0 rgba(248,113,113,0.2);}
+.btn-amber{background:rgba(217,119,6,0.45);border:0.5px solid rgba(251,191,36,0.35);color:#fbbf24;box-shadow:inset 0 0.5px 0 rgba(251,191,36,0.2);}
+.btn-outline{background:rgba(255,255,255,0.07);border:0.5px solid var(--glass-border);color:var(--text2);}
 
 /* API INPUT */
-.api-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;padding:8px 12px;font-size:12px;width:100%;outline:none;margin-bottom:8px;}
-.api-input:focus{border-color:rgba(74,222,128,0.4);}
+.api-input{background:rgba(255,255,255,0.07);border:0.5px solid var(--glass-border);border-radius:10px;color:#fff;padding:9px 12px;font-size:12px;width:100%;outline:none;margin-bottom:10px;}
+.api-input:focus{border-color:rgba(74,222,128,0.45);}
+.api-input::placeholder{color:var(--text3);}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:rgba(20,15,40,0.97);border:0.5px solid rgba(255,255,255,0.2);border-radius:20px;padding:24px;width:100%;max-width:320px;box-shadow:0 24px 64px rgba(0,0,0,0.6);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.68);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:rgba(18,12,36,0.97);border:0.5px solid var(--glass-border);border-radius:22px;padding:24px;width:100%;max-width:320px;box-shadow:0 32px 80px rgba(0,0,0,0.7);}
 .modal h3{font-size:16px;font-weight:700;margin-bottom:8px;}
-.modal p{font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6;}
+.modal p{font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.65;}
 .modal-btns{display:flex;gap:10px;}
-.modal-btns .btn{margin-top:0;}
-.edit-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;padding:12px;font-size:22px;font-weight:800;width:100%;text-align:center;outline:none;margin-bottom:16px;}
-.edit-input:focus{border-color:rgba(251,191,36,0.5);}
+.modal-btns .btn{margin-top:0;flex:1;}
+.edit-input{background:rgba(255,255,255,0.08);border:0.5px solid var(--glass-border);border-radius:12px;color:#fff;padding:14px;font-size:26px;font-weight:900;width:100%;text-align:center;outline:none;margin-bottom:16px;-webkit-appearance:none;}
+.edit-input:focus{border-color:rgba(251,191,36,0.55);}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(20,15,40,0.95);border:0.5px solid rgba(255,255,255,0.2);backdrop-filter:blur(20px);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;transition:transform 0.3s;white-space:nowrap;}
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(90px);background:rgba(16,12,32,0.96);border:0.5px solid var(--glass-border);backdrop-filter:blur(20px);color:#fff;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:600;z-index:999;transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
 .toast.show{transform:translateX(-50%) translateY(0);}
 </style>
 </head>
@@ -212,11 +199,11 @@ body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px
 <div class="blob2"></div><div class="blob3"></div>
 
 <div class="header">
-  <div class="header-title">
-    <span style="font-size:22px;">🐉</span>
+  <div class="header-left">
+    <span style="font-size:24px;">🐉</span>
     <div>
       <h1>Dragon Cards</h1>
-      <div class="sub" id="syncStatus">Lưu cục bộ</div>
+      <div class="sub" id="syncStatus">Chưa đồng bộ</div>
     </div>
   </div>
   <button class="sync-btn" onclick="syncToSheets()">☁️ Sync</button>
@@ -238,40 +225,28 @@ body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px
     <div class="sum-box"><div class="val" style="color:#60a5fa" id="ovPct">0%</div><div class="lbl">Hoàn thành</div></div>
   </div>
   <div class="prog-wrap">
-    <div class="prog-label"><span style="font-weight:600;">Tiến độ chung</span><span id="ovProgLabel">0 / 0</span></div>
+    <div class="prog-label"><span>Tiến độ chung</span><span id="ovProgLabel">0 / 0</span></div>
     <div class="prog-bar"><div class="prog-fill" id="ovProgFill" style="width:0%"></div></div>
   </div>
-
   <div class="glass-card">
-    <div class="sec-title">
-      <div style="display:flex;gap:2px;" id="ovNormalStarSample"></div>
-      <span class="sec-label" style="color:#60a5fa;">Thẻ Thường</span>
-    </div>
+    <div class="card-title" style="color:#60a5fa;">⬜ Thẻ Thường</div>
     <div id="ovNormal"></div>
   </div>
-
   <div class="glass-card">
-    <div class="sec-title">
-      <div style="display:flex;gap:2px;" id="ovShinyStarSample"></div>
-      <span class="sec-label" style="background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Thẻ Shiny ✨</span>
-    </div>
+    <div class="card-title" style="background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">✨ Thẻ Shiny</div>
     <div id="ovShiny"></div>
   </div>
 </div>
 
 <!-- THẺ THƯỜNG -->
 <div class="page" id="page-normal">
-  <div class="sec-title" style="padding:0 2px 6px;">
-    <span class="sec-label" style="color:#60a5fa;">⬜ Thẻ Thường — Sao Xanh</span>
-  </div>
+  <div class="sec-title" style="color:#60a5fa;">⬜ Thẻ Thường — Sao Xanh ✦</div>
   <div id="rowsNormal"></div>
 </div>
 
 <!-- THẺ SHINY -->
 <div class="page" id="page-shiny">
-  <div class="sec-title" style="padding:0 2px 6px;">
-    <span class="sec-label" style="background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">✨ Thẻ Shiny — Sao Cầu Vồng</span>
-  </div>
+  <div class="sec-title" style="background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">✨ Thẻ Shiny — Sao Cầu Vồng ✦</div>
   <div id="rowsShiny"></div>
 </div>
 
@@ -287,15 +262,9 @@ body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px
   </div>
   <button class="btn btn-amber" onclick="saveSetup()">💾 Lưu thiết lập</button>
 
-  <div class="glass-card" style="margin-top:14px;">
-    <div class="card-title">☁️ Google Sheets API</div>
-    <input class="api-input" id="apiInput" placeholder="https://script.google.com/macros/s/...">
-    <button class="btn btn-green" onclick="saveApi()">✅ Lưu API URL</button>
-  </div>
-
   <div class="glass-card">
     <div class="card-title">🔄 Đặt lại</div>
-    <button class="btn btn-red" onclick="doReset()">🗑 Đặt lại toàn bộ dữ liệu</button>
+    <button class="btn btn-red" style="margin-top:0;" onclick="doReset()">🗑 Đặt lại toàn bộ dữ liệu</button>
   </div>
 </div>
 
@@ -306,7 +275,7 @@ body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px
     <p id="confMsg"></p>
     <div class="modal-btns">
       <button class="btn btn-green" id="confOk">✅ Xác nhận</button>
-      <button class="btn" style="background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);" onclick="closeConf()">Huỷ</button>
+      <button class="btn btn-outline" onclick="closeConf()">Huỷ</button>
     </div>
   </div>
 </div>
@@ -316,10 +285,10 @@ body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px
   <div class="modal">
     <h3 id="editTitle">Sửa số còn thiếu</h3>
     <p style="font-size:13px;color:var(--text3);margin-bottom:12px;">Nhập số thẻ còn cần thu thập</p>
-    <input class="edit-input" id="editInput" type="number" min="0">
+    <input class="edit-input" id="editInput" type="number" min="0" inputmode="numeric">
     <div class="modal-btns">
       <button class="btn btn-amber" onclick="saveEdit()">💾 Lưu</button>
-      <button class="btn" style="background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);" onclick="closeEdit()">Huỷ</button>
+      <button class="btn btn-outline" onclick="closeEdit()">Huỷ</button>
     </div>
   </div>
 </div>
@@ -328,36 +297,54 @@ body::after{width:280px;height:280px;background:#1a7f5a;bottom:-60px;right:-60px
 
 <script>
 const STARS=[1,2,3,4,5];
+const API_URL='https://script.google.com/macros/s/AKfycbyHsIFOW378_XcXyMcBdmHi39lw6Xsxl84Rvvh4K2hI2vGQnoLg16gsmYXpyQCePoAl/exec';
+
 let state={
   target:{normal:{1:0,2:0,3:0,4:0,5:0},shiny:{1:0,2:0,3:0,4:0,5:0}},
   need:  {normal:{1:0,2:0,3:0,4:0,5:0},shiny:{1:0,2:0,3:0,4:0,5:0}},
-  apiUrl:''
+  apiUrl: API_URL
 };
 
+// LOAD/SAVE
 function load(){
-  const s=localStorage.getItem('dc_v2');
-  if(s) state=JSON.parse(s);
-  document.getElementById('apiInput').value=state.apiUrl||'';
+  try{
+    const s=localStorage.getItem('dc_v3');
+    if(s){
+      const parsed=JSON.parse(s);
+      // merge để không mất apiUrl mặc định
+      state=Object.assign({},state,parsed);
+      state.apiUrl=state.apiUrl||API_URL;
+    }
+  }catch(e){}
+  const apiEl=document.getElementById('apiInput');
+  if(apiEl) apiEl.value=state.apiUrl||'';
 }
-function save(){localStorage.setItem('dc_v2',JSON.stringify(state));}
-function toast(m,d=2200){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function save(){
+  try{localStorage.setItem('dc_v3',JSON.stringify(state));}catch(e){}
+}
 
-// STARS HTML
-function normalStars(n){return STARS.map(i=>`<div class="star-n${i>n?' off':''}"></div>`).join('');}
-function shinyStars(n){return STARS.map(i=>`<div class="star-s${i>n?' off':''}"></div>`).join('');}
+// TOAST
+function toast(m,d=2200){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),d);
+}
+
+// STAR HTML
+function normalStars(n){
+  return STARS.map(i=>`<div class="star-n${i>n?' off':''}"></div>`).join('');
+}
+function shinyStars(n){
+  return STARS.map(i=>`<div class="star-s${i>n?' off':''}"></div>`).join('');
+}
 
 // TAB
-let currentTab='ov';
 function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t=>{t.className='tab';});
+  document.querySelectorAll('.tab').forEach(t=>t.className='tab');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const tabEl=document.getElementById('tab-'+name);
-  if(name==='ov') tabEl.classList.add('active-ov');
-  else if(name==='normal') tabEl.classList.add('active-normal');
-  else if(name==='shiny') tabEl.classList.add('active-shiny');
-  else tabEl.classList.add('active-set');
+  document.getElementById('tab-'+name).classList.add('active-'+({'ov':'ov','normal':'normal','shiny':'shiny','settings':'set'}[name]));
   document.getElementById('page-'+name).classList.add('active');
-  currentTab=name;
   if(name==='ov') renderOv();
   if(name==='normal') renderRows('normal');
   if(name==='shiny') renderRows('shiny');
@@ -371,90 +358,90 @@ function renderRows(type){
   el.innerHTML=STARS.map(s=>{
     const need=state.need[type][s];
     const target=state.target[type][s];
-    const have=target-need;
+    const have=Math.max(0,target-need);
     const done=need===0&&target>0;
     const cls=need===0?'zero':need<=5?'low':'high';
-    if(isShiny){
-      return `<div class="card-shiny${done?' done':''}">
-        <div class="shiny-inner">
-          <div class="card-content">
-            <div class="card-star-row">
-              <div class="stars-shiny">${shinyStars(s)}</div>
-              ${done?`<span class="done-badge">✅ Đủ rồi!</span>`:''}
-            </div>
-            <div class="need-count ${cls}">${need}</div>
-            <div class="need-sub">còn thiếu · đã có ${have}/${target}</div>
-          </div>
-          <button class="edit-btn" onclick="openEdit('${type}',${s})">✏️</button>
-          <button class="minus-btn shiny-btn" onclick="minus('${type}',${s})" ${need<=0?'disabled':''}>−</button>
-        </div>
-      </div>`;
-    } else {
-      const isGold = s >= 4;
-      return `<div class="card-normal${isGold?' gold':''}${done?' done':''}">
-        <div class="card-content">
-          <div class="card-star-row">
-            <div class="stars-normal">${normalStars(s)}</div>
-            ${done?`<span class="done-badge">✅ Đủ rồi!</span>`:''}
-          </div>
-          <div class="need-count ${cls}">${need}</div>
-          <div class="need-sub">còn thiếu · đã có ${have}/${target}</div>
-        </div>
+    const stars=isShiny?`<div class="stars-row">${shinyStars(s)}</div>`:`<div class="stars-row">${normalStars(s)}</div>`;
+    const doneBadge=done?`<span class="done-badge">✅ Đủ rồi!</span>`:'';
+    const minusCls=isShiny?'shiny-btn':s>=4?'gold-btn':'normal-btn';
+    const inner=`
+      <div class="card-content">
+        <div class="card-star-row">${stars}${doneBadge}</div>
+        <div class="need-count ${cls}">${need}</div>
+        <div class="need-sub">còn thiếu &nbsp;·&nbsp; đã có ${have} / ${target}</div>
+      </div>
+      <div class="action-btns">
+        <button class="minus-btn ${minusCls}" onclick="minus('${type}',${s})" ${need<=0?'disabled':''}>−</button>
         <button class="edit-btn" onclick="openEdit('${type}',${s})">✏️</button>
-        <button class="minus-btn normal-btn" onclick="minus('${type}',${s})" ${need<=0?'disabled':''}>−</button>
       </div>`;
+    if(isShiny){
+      return `<div class="card-shiny${done?' done':''}"><div class="shiny-inner">${inner}</div></div>`;
+    } else {
+      return `<div class="card-normal${s>=4?' gold':''}${done?' done':''}">${inner}</div>`;
     }
   }).join('');
 }
 
-// MINUS
+// MINUS — bấm giảm
 function minus(type,star){
   const need=state.need[type][star];
   if(need<=0){toast('✅ Đã đủ thẻ này rồi!');return;}
   const typeName=type==='shiny'?'✨ Shiny':'⬜ Thường';
+  const starStr='✦'.repeat(star);
   openConf(
-    `Nhận thẻ ${typeName}`,
-    `${normalStars(star).replace(/<[^>]+>/g,'⭐')} Giảm từ ${need} → ${need-1} thẻ còn thiếu?`,
+    `Nhận thẻ ${typeName} ${starStr}`,
+    `Xác nhận giảm số thẻ còn thiếu từ ${need} → ${need-1}?`,
     ()=>{
       state.need[type][star]--;
       save();
       renderRows(type);
       renderOv();
-      toast(`✅ Còn thiếu ${state.need[type][star]} thẻ!`);
+      const left=state.need[type][star];
+      toast(left===0?`🎉 Đã đủ thẻ ${starStr}!`:`✅ Còn thiếu ${left} thẻ ${starStr}`);
     }
   );
 }
 
-// EDIT
+// EDIT — sửa thủ công
 let editCtx=null;
 function openEdit(type,star){
   editCtx={type,star};
   const typeName=type==='shiny'?'✨ Shiny':'⬜ Thường';
-  document.getElementById('editTitle').textContent=`${typeName} — ${star}⭐`;
+  document.getElementById('editTitle').textContent=`${typeName} ${'✦'.repeat(star)} — Sửa số thiếu`;
   document.getElementById('editInput').value=state.need[type][star];
   document.getElementById('editModal').style.display='flex';
-  setTimeout(()=>document.getElementById('editInput').select(),100);
+  setTimeout(()=>{
+    const inp=document.getElementById('editInput');
+    inp.focus();inp.select();
+  },120);
 }
 function saveEdit(){
   if(!editCtx)return;
   const v=Math.max(0,parseInt(document.getElementById('editInput').value)||0);
+  // nếu v > target thì điều chỉnh target luôn
+  if(v>state.target[editCtx.type][editCtx.star]){
+    state.target[editCtx.type][editCtx.star]=v;
+  }
   state.need[editCtx.type][editCtx.star]=v;
-  save(); renderRows(editCtx.type); renderOv(); closeEdit();
+  save();
+  renderRows(editCtx.type);
+  renderOv();
+  closeEdit();
   toast('💾 Đã lưu!');
 }
 function closeEdit(){document.getElementById('editModal').style.display='none';editCtx=null;}
 
 // OVERVIEW
 function renderOv(){
-  let tTarget=0,tNeed=0;
-  ['normal','shiny'].forEach(t=>STARS.forEach(s=>{tTarget+=state.target[t][s];tNeed+=state.need[t][s];}));
-  const tHave=tTarget-tNeed;
-  const pct=tTarget>0?Math.round((tHave/tTarget)*100):0;
-  document.getElementById('ovHave').textContent=tHave;
-  document.getElementById('ovNeed').textContent=tNeed;
-  document.getElementById('ovTarget').textContent=tTarget;
+  let tT=0,tN=0;
+  ['normal','shiny'].forEach(t=>STARS.forEach(s=>{tT+=state.target[t][s];tN+=state.need[t][s];}));
+  const tH=Math.max(0,tT-tN);
+  const pct=tT>0?Math.round((tH/tT)*100):0;
+  document.getElementById('ovHave').textContent=tH;
+  document.getElementById('ovNeed').textContent=tN;
+  document.getElementById('ovTarget').textContent=tT;
   document.getElementById('ovPct').textContent=pct+'%';
-  document.getElementById('ovProgLabel').textContent=`${tHave} / ${tTarget}`;
+  document.getElementById('ovProgLabel').textContent=`${tH} / ${tT}`;
   document.getElementById('ovProgFill').style.width=pct+'%';
 
   ['normal','shiny'].forEach(type=>{
@@ -462,13 +449,14 @@ function renderOv(){
     el.innerHTML=STARS.map(s=>{
       const need=state.need[type][s];
       const target=state.target[type][s];
-      const have=target-need;
+      const have=Math.max(0,target-need);
       const p=target>0?Math.round((have/target)*100):0;
-      const color=need===0&&target>0?'#4ade80':need<=5?'#fbbf24':'#f87171';
+      const color=need===0&&target>0?'#4ade80':need<=5&&need>0?'#fbbf24':'#f87171';
+      const label=need===0&&target>0?'✅ Đủ':need===0&&target===0?'—':need+' thiếu';
       return `<div class="ov-row">
         <div class="ov-stars">${type==='shiny'?shinyStars(s):normalStars(s)}</div>
         <div class="ov-bar"><div class="${type==='shiny'?'ov-fill-s':'ov-fill-n'}" style="width:${p}%"></div></div>
-        <div class="ov-need" style="color:${color}">${need===0&&target>0?'✅':need+' thiếu'}</div>
+        <div class="ov-need" style="color:${color}">${label}</div>
       </div>`;
     }).join('');
   });
@@ -480,8 +468,14 @@ function renderSetup(){
     const el=document.getElementById('setup'+cap(type));
     el.innerHTML=STARS.map(s=>`
       <div class="setup-row">
-        <div class="setup-label">${type==='shiny'?shinyStars(s).replace(/<div/g,'<div style="display:inline-block"'):normalStars(s).replace(/<div/g,'<div style="display:inline-block"')} ${s} Sao</div>
-        <input class="setup-input" id="sp_${type}_${s}" type="number" min="0" value="${state.target[type][s]||''}">
+        <div class="setup-label">
+          ${type==='shiny'
+            ?STARS.map(i=>`<div class="star-s${i>s?' off':''}" style="width:12px;height:12px;flex-shrink:0;"></div>`).join('')
+            :STARS.map(i=>`<div class="star-n${i>s?' off':''}" style="width:12px;height:12px;flex-shrink:0;"></div>`).join('')
+          }
+          <span style="margin-left:4px;">${s} Sao</span>
+        </div>
+        <input class="setup-input" id="sp_${type}_${s}" type="number" min="0" inputmode="numeric" value="${state.target[type][s]||''}">
       </div>`).join('');
   });
 }
@@ -489,30 +483,56 @@ function renderSetup(){
 function saveSetup(){
   ['normal','shiny'].forEach(type=>{
     STARS.forEach(s=>{
-      const v=parseInt(document.getElementById(`sp_${type}_${s}`).value)||0;
+      const v=Math.max(0,parseInt(document.getElementById(`sp_${type}_${s}`).value)||0);
       const oldT=state.target[type][s];
-      const had=oldT-state.need[type][s];
+      const had=Math.max(0,oldT-state.need[type][s]);
       state.target[type][s]=v;
       state.need[type][s]=Math.max(0,v-had);
     });
   });
-  save(); renderOv(); toast('✅ Đã lưu thiết lập!');
+  save();renderOv();
+  toast('✅ Đã lưu thiết lập!');
 }
 
 function saveApi(){
-  state.apiUrl=document.getElementById('apiInput').value.trim();
-  save(); toast('✅ Đã lưu API!');
+  const url=document.getElementById('apiInput').value.trim();
+  state.apiUrl=url||API_URL;
+  save();toast('✅ Đã lưu API URL!');
 }
 
 // SYNC
 async function syncToSheets(){
-  if(!state.apiUrl){toast('⚠️ Chưa có API URL trong Cài Đặt!');return;}
+  const url=state.apiUrl||API_URL;
   document.getElementById('syncStatus').textContent='⏳ Đang sync...';
   try{
-    await fetch(state.apiUrl,{method:'POST',body:JSON.stringify({action:'save_dc',data:state}),headers:{'Content-Type':'application/json'}});
+    const res=await fetch(url,{
+      method:'POST',
+      body:JSON.stringify({action:'save_dc',data:state}),
+      headers:{'Content-Type':'application/json'}
+    });
     document.getElementById('syncStatus').textContent='✅ '+new Date().toLocaleTimeString('vi-VN');
-    toast('☁️ Đã lưu lên Sheets!');
-  }catch(e){document.getElementById('syncStatus').textContent='❌ Lỗi';toast('❌ Không kết nối được!');}
+    toast('☁️ Đã lưu lên Google Sheets!');
+  }catch(e){
+    document.getElementById('syncStatus').textContent='❌ Lỗi kết nối';
+    toast('❌ Không sync được! Kiểm tra mạng.');
+  }
+}
+
+async function loadFromSheets(){
+  const url=state.apiUrl||API_URL;
+  try{
+    const res=await fetch(url+'?action=get_dc');
+    const json=await res.json();
+    const d=json.data||json;
+    if(d&&d.target&&d.need){
+      state.target=d.target;
+      state.need=d.need;
+      save();renderOv();
+      document.getElementById('syncStatus').textContent='☁️ Đồng bộ '+new Date().toLocaleTimeString('vi-VN');
+    }
+  }catch(e){
+    document.getElementById('syncStatus').textContent='Lưu cục bộ';
+  }
 }
 
 // CONFIRM
@@ -522,7 +542,7 @@ function openConf(title,msg,cb){
   document.getElementById('confMsg').textContent=msg;
   confCb=cb;
   document.getElementById('confirmModal').style.display='flex';
-  document.getElementById('confOk').onclick=()=>{closeConf();if(confCb)confCb();};
+  document.getElementById('confOk').onclick=()=>{closeConf();confCb&&confCb();};
 }
 function closeConf(){document.getElementById('confirmModal').style.display='none';confCb=null;}
 
@@ -531,13 +551,16 @@ function doReset(){
   openConf('⚠️ Đặt lại toàn bộ','Xóa hết dữ liệu? Không thể hoàn tác!',()=>{
     state.need={normal:{1:0,2:0,3:0,4:0,5:0},shiny:{1:0,2:0,3:0,4:0,5:0}};
     state.target={normal:{1:0,2:0,3:0,4:0,5:0},shiny:{1:0,2:0,3:0,4:0,5:0}};
-    save(); renderOv(); toast('🗑 Đã đặt lại!');
+    save();renderOv();toast('🗑 Đã đặt lại!');
   });
 }
 
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 
-load(); renderOv();
+// INIT
+load();
+renderOv();
+loadFromSheets(); // tự tải từ Sheets khi mở app
 </script>
 </body>
 </html>
