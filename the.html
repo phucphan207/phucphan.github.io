@@ -542,7 +542,7 @@ function openConf(title,msg,cb){
   document.getElementById('confMsg').textContent=msg;
   confCb=cb;
   document.getElementById('confirmModal').style.display='flex';
-  document.getElementById('confOk').onclick=()=>{closeConf();confCb&&confCb();};
+  document.getElementById('confOk').onclick=()=>{const cb=confCb;closeConf();cb&&cb();};
 }
 function closeConf(){document.getElementById('confirmModal').style.display='none';confCb=null;}
 
