@@ -512,12 +512,8 @@ async function syncToSheets(){
   const url=state.apiUrl||API_URL;
   document.getElementById('syncStatus').textContent='⏳ Đang sync...';
   try{
-    await fetch(url,{
-      method:'POST',
-      mode:'no-cors',
-      body:JSON.stringify({action:'save_dc',data:state}),
-      headers:{'Content-Type':'text/plain'}
-    });
+    const data=encodeURIComponent(JSON.stringify({action:'save_dc',data:state}));
+    await fetch(`${url}?payload=${data}`,{mode:'no-cors'});
     document.getElementById('syncStatus').textContent='✅ '+new Date().toLocaleTimeString('vi-VN');
   }catch(e){
     document.getElementById('syncStatus').textContent='❌ Lỗi kết nối';
