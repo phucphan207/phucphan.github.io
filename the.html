@@ -394,6 +394,7 @@ function minus(type,star){
     ()=>{
       state.need[type][star]--;
       save();
+      autoSync();
       renderRows(type);
       renderOv();
       const left=state.need[type][star];
@@ -424,6 +425,7 @@ function saveEdit(){
   }
   state.need[editCtx.type][editCtx.star]=v;
   save();
+  autoSync();
   renderRows(editCtx.type);
   renderOv();
   closeEdit();
@@ -490,7 +492,7 @@ function saveSetup(){
       state.need[type][s]=Math.max(0,v-had);
     });
   });
-  save();renderOv();
+  save();autoSync();renderOv();
   toast('✅ Đã lưu thiết lập!');
 }
 
@@ -500,13 +502,19 @@ function saveApi(){
   save();toast('✅ Đã lưu API URL!');
 }
 
-// SYNC
+// AUTO SYNC
+let syncTimer=null;
+function autoSync(){
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>syncToSheets(),1000);
+}
 async function syncToSheets(){
   const url=state.apiUrl||API_URL;
   document.getElementById('syncStatus').textContent='⏳ Đang sync...';
   try{
-    const res=await fetch(url,{
+    await fetch(url,{
       method:'POST',
+      mode:'no-cors',
       body:JSON.stringify({action:'save_dc',data:state}),
       headers:{'Content-Type':'application/json'}
     });
@@ -522,13 +530,16 @@ async function loadFromSheets(){
   const url=state.apiUrl||API_URL;
   try{
     const res=await fetch(url+'?action=get_dc');
-    const json=await res.json();
-    const d=json.data||json;
-    if(d&&d.target&&d.need){
-      state.target=d.target;
-      state.need=d.need;
+    const text=await res.text();
+    const d=JSON.parse(text);
+    const data=d.data||d;
+    if(data&&data.target&&data.need){
+      state.target=data.target;
+      state.need=data.need;
       save();renderOv();
-      document.getElementById('syncStatus').textContent='☁️ Đồng bộ '+new Date().toLocaleTimeString('vi-VN');
+      document.getElementById('syncStatus').textContent='☁️ '+new Date().toLocaleTimeString('vi-VN');
+    } else {
+      document.getElementById('syncStatus').textContent='Lưu cục bộ';
     }
   }catch(e){
     document.getElementById('syncStatus').textContent='Lưu cục bộ';
