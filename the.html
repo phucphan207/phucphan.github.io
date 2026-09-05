@@ -514,12 +514,13 @@ async function syncToSheets(){
   try{
     await fetch(url,{
       method:'POST',
+      mode:'no-cors',
       body:JSON.stringify({action:'save_dc',data:state}),
+      headers:{'Content-Type':'text/plain'}
     });
     document.getElementById('syncStatus').textContent='✅ '+new Date().toLocaleTimeString('vi-VN');
   }catch(e){
-    // no-cors nên không đọc được response, coi như thành công nếu không throw
-    document.getElementById('syncStatus').textContent='✅ '+new Date().toLocaleTimeString('vi-VN');
+    document.getElementById('syncStatus').textContent='❌ Lỗi kết nối';
   }
 }
 
